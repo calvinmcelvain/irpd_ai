@@ -2,7 +2,6 @@ import os
 import pandas as pd
 import numpy as np
 import ast 
-from datetime import date
 
 # Working Dir.
 os.chdir('/Users/fogellmcmuffin/Documents/ra/team_discussions/AI/')
@@ -50,22 +49,15 @@ def get_test_dir(test_type='test', cycle=False):  # Function to get test directo
   return test_dir
 
 
-def test_info(test, data_name):  # Function to get test info
-  info = str(
-    'ChatGPT Model Information:' + '\n' +
-    'format: OpenAI API' + '\n' +
-    'model: ' + str(MODEL) + '\n' +
-    'temperature: ' + str(TEMPERATURE) + '\n' +
-    'max tokens: ' + str(MAX_TOKENS) + '\n' +
-    'top p: ' + str(TOP_P) + '\n' +
-    'frequency penalty: ' + str(FREQUENCY_PENALTY) + '\n' +
-    'presence penalty: ' + str(PRESENCE_PENALTY) + '\n\n' +
-    'Test Information:' + '\n' + 
-    'test: ' + test + '\n' +
-    'data: ' + data_name + '\n' +
-    'date: ' + str(date.today()) + '\n'
-  )
-  return info
+def get_cat_number(stage_dir, previous=False):      # Function to get category number
+    cats = [i[4:] for i in os.listdir(stage_dir) if i.startswith('cat')]
+    cat_numbers = [int(k) for k in cats]
+    cat_numbers.append(0)
+    
+    new_cat_number = max(cat_numbers) + 1 if previous == False else max(cat_numbers)
+    
+    cat_number = f"cat_{new_cat_number}"
+    return cat_number
 
 
 ### Final output functions ###
