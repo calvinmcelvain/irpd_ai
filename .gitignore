@@ -9,3 +9,6 @@
 *.pyc
 *.pyo
 __pycache__/
+
+# Ignore API key
+gpt_key.py
