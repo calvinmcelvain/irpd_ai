@@ -63,8 +63,14 @@ ra_no_noise_trim.to_csv(f'trim_data/RAsum_no_noise_v{version}.csv', index=False)
 ra_noise_trim.to_csv(f'trim_data/RAsum_noise_v{version}.csv', index=False)
 ra_merged_trim.to_csv(f'trim_data/RAsum_merged_v{version}.csv', index=False)
 
+## Creating test dataframes for FAR instances ##
 
-## Creating test dataframes ##
+ra_no_noise_trim.to_csv(f'test_data/RAsum_no_noise_v{version}.csv', index=False)
+ra_noise_trim.to_csv(f'test_data/RAsum_noise_v{version}.csv', index=False)
+ra_merged_trim.to_csv(f'test_data/RAsum_merged_v{version}.csv', index=False)
+
+
+## Creating test dataframes for ucoop/udef instances ##
 
 # Importing trim data
 ra_no_noise = pd.read_csv(f'trim_data/RAsum_no_noise_v{version}.csv')
