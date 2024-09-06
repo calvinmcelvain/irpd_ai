@@ -118,8 +118,7 @@ def remove_summary_commas(df):
   '''
   Function to remove commas in the summaries for better GPT readability
   '''
-  for i in range(1,3):
-    df[f'summary_{i}'] = df[f'summary_{i}'].str.replace(',', '', regex=False)
+  df[f'summary'] = df[f'summary'].str.replace(',', '', regex=False)
   return df
 
 
@@ -222,7 +221,7 @@ def ucoop_udef_rename(df, prefix):
   '''
   Adds 'ucoop' and 'udef' prefixes to categories names in the output of the response_df
   '''
-  remove_columns = ['summary_1', 'summary_2', 'unilateral_cooperation', 'window_number', 'gpt_reasoning']
+  remove_columns = ['summary', 'unilateral_cooperation', 'window_number', 'gpt_reasoning']
   df_dropped = df.drop(columns=remove_columns)
   category_columns = df_dropped.columns.to_list()
   
@@ -236,6 +235,6 @@ def final_merge_df(final_df, og_df):
   '''
   Function to get the original test dataframe variables with gpt codings & rationale
   '''
-  final_df = final_df.drop(['summary_1', 'summary_2', 'unilateral_cooperation'], axis=1)
+  final_df = final_df.drop(['summary', 'unilateral_cooperation'], axis=1)
   merged_df = pd.merge(og_df, final_df, on='window_number')
   return merged_df

@@ -40,7 +40,7 @@ ra_noise_trim = pd.read_csv(f'raw_data/RAsum_noise_v{version}.csv')
 ra_no_noise_trim = pd.read_csv(f'raw_data/RAsum_no_noise_v{version}.csv')
 
 # Trimming columns
-keep_columns = ['summary_1', 'summary_2', 'window_number', 'unilateral_cooperate', 'unilateral_defect']
+keep_columns = ['summary', 'window_number', 'unilateral_cooperate', 'unilateral_defect']
 ra_noise_trim = ra_noise_trim[keep_columns]
 ra_no_noise_trim = ra_no_noise_trim[keep_columns]
 
