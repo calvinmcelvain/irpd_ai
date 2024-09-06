@@ -1,0 +1,14 @@
+# Conda Env
+*.conda
+
+# Ignoring data stores
+*.sqlite3
+*.DS_Store
+
+# Ignoring Pychache
+*.pyc
+*.pyo
+__pycache__/
+
+# Ignore API key
+gpt_key.py
