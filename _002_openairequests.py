@@ -122,9 +122,6 @@ def stage_1_FAR_output(treatment, test_type='test'):
 
     user = str(df.to_dict('records')) # Turning data into a list of dictionaries, then to string
 
-    # Aggregating prompts
-    window_prompts = [sys, user]
-
     # Making test directory
     if test_type == 'test':
         test = f.get_test_name()
@@ -142,7 +139,7 @@ def stage_1_FAR_output(treatment, test_type='test'):
     f.write_file(file_path=info_path, file_write=info)
 
     # GPT requests
-    inst_dir = os.path.join(test_dir, 'stage_1') # Creating ind. instance directory
+    inst_dir = os.path.join(test_dir, 'stage_1') # Creating instance directory
     os.makedirs(inst_dir, exist_ok=False)
 
     # GPT request output
@@ -225,6 +222,55 @@ def stage_1r_output(treatment, test_type='test'):
         f.write_file(file_path=sys_prmpt_path, file_write=sys_prmpt)
         f.write_file(file_path=user_prmpt_path, file_write=user_prmpt)
         f.write_file(file_path=response_path, file_write=str(output))
+    return print("Stage 1r Complete")
+
+
+def stage_1r_FAR_output(treatment, test_type='test'):
+    '''
+    Stage 1 refinement function for FAR coding
+    '''
+    # Getting test directory
+    if test_type == 'test':
+        test = f.get_test_name(previous=True)
+        test_dir = os.path.join('output/', test)
+    elif test_type == 'subtest':
+        test = f.get_test_name(test_type='subtest', previous=True)
+        test_dir = os.path.join('output/_subtests/', test)
+    
+    # System prompts
+    sys = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1r', window_type='FAR')
+    
+    # User prompts
+    stg_1_dir = os.path.join(test_dir, 'stage_1/')
+    if test_type == 'test':
+        response_path = os.path.join(stg_1_dir, f't{test[5:]}_stg_1_response.txt')
+    elif test_type == 'subtest':
+        response_path = os.path.join(stg_1_dir, f'{test}_stg_1_response.txt')
+
+    user = f.file_to_string(file_path=response_path)
+    
+    # GPT requests
+    inst_dir = os.path.join(test_dir, 'stage_1r') # Creating directory
+    os.makedirs(inst_dir, exist_ok=False)
+
+    # GPT request output
+    model.set_max_tokens(2000)
+    output = model.GPT_response(sys=sys, user=user)
+
+    # Creating paths for prompts & GPT response
+    if test_type == 'test':
+        sys_prmpt_path = os.path.join(inst_dir, f't{test[5:]}_stg_1r_sys_prmpt.txt')
+        user_prmpt_path = os.path.join(inst_dir, f't{test[5:]}_stg_1r_user_prmpt.txt')
+        response_path = os.path.join(inst_dir, f't{test[5:]}_stg_1r_response.txt')
+    elif test_type == 'subtest':
+        sys_prmpt_path = os.path.join(inst_dir, f'{test}_stg_1r_sys_prmpt.txt')
+        user_prmpt_path = os.path.join(inst_dir, f'{test}_stg_1r_user_prmpt.txt')
+        response_path = os.path.join(inst_dir, f'{test}_stg_1r_response.txt')
+
+    # Writing .txt files for prompts & GPT response
+    f.write_file(file_path=sys_prmpt_path, file_write=sys)
+    f.write_file(file_path=user_prmpt_path, file_write=user)
+    f.write_file(file_path=response_path, file_write=str(output))
     return print("Stage 1r Complete")
 
 
@@ -344,5 +390,6 @@ def run_full_test(treatment, test_type, max_windows, refinement):
 # stage_1_output(treatment=, test_type=)
 # stage_1_FAR_output(treatment=, test_type=)
 # stage_1r_output(treatment=, test_type=)
+# stage_1r_FAR_output(treatment=, test_type=)
 # stage_2_output(treatment=, test_type=, max_windows=, refinement=)
 # run_full_test(treatment=, test_type=, max_windows=, refinement=)
