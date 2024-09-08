@@ -20,6 +20,9 @@ importlib.reload(f)
 ## Summary data ##
 ###################
 
+# Set this before running
+summary_type = 'FAR'
+
 ## Merging raw summary data ##
 
 # Import raw data
@@ -40,7 +43,7 @@ ra_noise_trim = pd.read_csv(f'raw_data/RAsum_noise_v{version}.csv')
 ra_no_noise_trim = pd.read_csv(f'raw_data/RAsum_no_noise_v{version}.csv')
 
 # Trimming columns
-keep_columns = ['summary', 'window_number', 'unilateral_cooperate', 'unilateral_defect']
+keep_columns = ['summary', 'window_number', 'unilateral_cooperate', 'unilateral_defect'] if summary_type != 'FAR' else ['summary', 'window_number', 'cooperate']
 ra_noise_trim = ra_noise_trim[keep_columns]
 ra_no_noise_trim = ra_no_noise_trim[keep_columns]
 
@@ -63,14 +66,8 @@ ra_no_noise_trim.to_csv(f'trim_data/RAsum_no_noise_v{version}.csv', index=False)
 ra_noise_trim.to_csv(f'trim_data/RAsum_noise_v{version}.csv', index=False)
 ra_merged_trim.to_csv(f'trim_data/RAsum_merged_v{version}.csv', index=False)
 
-## Creating test dataframes for FAR instances ##
 
-ra_no_noise_trim.to_csv(f'test_data/RAsum_no_noise_v{version}.csv', index=False)
-ra_noise_trim.to_csv(f'test_data/RAsum_noise_v{version}.csv', index=False)
-ra_merged_trim.to_csv(f'test_data/RAsum_merged_v{version}.csv', index=False)
-
-
-## Creating test dataframes for ucoop/udef instances ##
+## Creating test dataframes ##
 
 # Importing trim data
 ra_no_noise = pd.read_csv(f'trim_data/RAsum_no_noise_v{version}.csv')
@@ -78,21 +75,28 @@ ra_noise = pd.read_csv(f'trim_data/RAsum_noise_v{version}.csv')
 ra_merge = pd.read_csv(f'trim_data/RAsum_merged_v{version}.csv')
 
 # Creating ucoop and udef test data
-ra_no_noise_ucoop, ra_no_noise_udef = f.ucoop_udef_summaries(ra_no_noise)   # ucoop & udef no-noise test data
-ra_noise_ucoop, ra_noise_udef = f.ucoop_udef_summaries(ra_noise)    # ucoop & udef noise test data
-ra_merge_ucoop, ra_merge_udef = f.ucoop_udef_summaries(ra_merge)    # ucoop & udef merged test data
+ra_no_noise_coop, ra_no_noise_def = f.test_summaries(ra_no_noise, type=summary_type)   # ucoop & udef no-noise test data
+ra_noise_coop, ra_noise_def = f.test_summaries(ra_noise, type=summary_type)    # ucoop & udef noise test data
+ra_merge_coop, ra_merge_def = f.test_summaries(ra_merge, type=summary_type)    # ucoop & udef merged test data
 
 # Export
-ra_no_noise_ucoop.to_csv(f'test_data/RAsum_no_noise_ucoop_v{version}.csv', index=False)
-ra_no_noise_udef.to_csv(f'test_data/RAsum_no_noise_udef_v{version}.csv', index=False)
-ra_noise_ucoop.to_csv(f'test_data/RAsum_noise_ucoop_v{version}.csv', index=False)
-ra_noise_udef.to_csv(f'test_data/RAsum_noise_udef_v{version}.csv', index=False)
-ra_merge_ucoop.to_csv(f'test_data/RAsum_merged_ucoop_v{version}.csv', index=False)
-ra_merge_udef.to_csv(f'test_data/RAsum_merged_udef_v{version}.csv', index=False)
+if summary_type != 'FAR':
+    ra_no_noise_coop.to_csv(f'test_data/RAsum_no_noise_ucoop_v{version}.csv', index=False)
+    ra_no_noise_def.to_csv(f'test_data/RAsum_no_noise_udef_v{version}.csv', index=False)
+    ra_noise_coop.to_csv(f'test_data/RAsum_noise_ucoop_v{version}.csv', index=False)
+    ra_noise_def.to_csv(f'test_data/RAsum_noise_udef_v{version}.csv', index=False)
+    ra_merge_coop.to_csv(f'test_data/RAsum_merged_ucoop_v{version}.csv', index=False)
+    ra_merge_def.to_csv(f'test_data/RAsum_merged_udef_v{version}.csv', index=False)
+else:
+    ra_no_noise_coop.to_csv(f'test_data/RAsum_no_noise_coop_v{version}.csv', index=False)
+    ra_no_noise_def.to_csv(f'test_data/RAsum_no_noise_def_v{version}.csv', index=False)
+    ra_noise_coop.to_csv(f'test_data/RAsum_noise_coop_v{version}.csv', index=False)
+    ra_noise_def.to_csv(f'test_data/RAsum_noise_def_v{version}.csv', index=False)
+    ra_merge_coop.to_csv(f'test_data/RAsum_merged_coop_v{version}.csv', index=False)
+    ra_merge_def.to_csv(f'test_data/RAsum_merged_def_v{version}.csv', index=False)
+
 ra_noise.to_csv(f'test_data/RAsum_merged_noise_v{version}.csv', index=False)
 ra_no_noise.to_csv(f'test_data/RAsum_merged_no_noise_v{version}.csv', index=False)
-
-
 
 ###########################
 ## Raw Experimental Data ##

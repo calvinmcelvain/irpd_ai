@@ -131,17 +131,17 @@ def trim(df, cols):
   return df
 
 
-def ucoop_udef_summaries(df):
+def test_summaries(df, type):
   '''
-  Function to seperate the unilateral cooperate and defect summaries into 2 different dataframes.
+  Function to seperate the trim data into ucoop/udef or coop/def test dfs based on summary type
   '''
-  df_ucoop = df.loc[(df['unilateral_cooperate'] == 1)]
-  df_ucoop = df_ucoop.drop(['unilateral_cooperate', 'unilateral_defect'], axis=1)
+  df_coop = df.loc[(df['unilateral_cooperate'] == 1)] if type != 'FAR' else df.loc[(df['cooperate'] == 1)]
+  df_coop = df_coop.drop(['unilateral_cooperate', 'unilateral_defect'], axis=1) if type != 'FAR' else df_coop.drop(['cooperate'], axis=1)
   
-  df_udef = df.loc[(df['unilateral_defect'] == 1)]
-  df_udef = df_udef.drop(['unilateral_defect', 'unilateral_cooperate'], axis=1)
+  df_def = df.loc[(df['unilateral_defect'] == 1)] if type != 'FAR' else df.loc[(df['cooperate'] == 0)]
+  df_def = df_def.drop(['unilateral_defect', 'unilateral_cooperate'], axis=1) if type != 'FAR' else df_def.drop(['cooperate'], axis=1)
   
-  return df_ucoop, df_udef
+  return df_coop, df_def
 
 
 def ucoop_udef_windows(df):
