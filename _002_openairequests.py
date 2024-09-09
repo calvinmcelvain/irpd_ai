@@ -86,7 +86,7 @@ def stage_1_output(treatment, summary_type, test_type='test'):
     f.write_file(file_path=info_path, file_write=info)
 
     # GPT requests
-    for i in window_prompts:  # Requests for both ucoop and udef instances
+    for i in window_prompts:  # Requests for instances
         inst_dir = os.path.join(test_dir, f'stage_1_{i[0]}') # Creating ind. instance directory
         os.makedirs(inst_dir, exist_ok=False)
 
@@ -115,10 +115,18 @@ def stage_1_output(treatment, summary_type, test_type='test'):
     return print("Stage 1 Complete")
 
 
-def stage_1r_output(treatment, test_type='test'):
+def stage_1r_output(treatment, summary_type, test_type='test'):
     '''
     Stage 1 refinement function
     '''
+    # Getting prefixes base don summary type
+    if summary_type == 'FAR':
+        type_1 = 'coop'
+        type_2 = 'def'
+    else:
+        type_1 = 'ucoop'
+        type_2 = 'udef'
+    
     # Getting test directory
     if test_type == 'test':
         test = f.get_test_name(previous=True)
@@ -128,27 +136,27 @@ def stage_1r_output(treatment, test_type='test'):
         test_dir = os.path.join('output/_subtests/', test)
     
     # System prompts
-    sys_ucoop = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1r', window_type='ucoop')
-    sys_udef = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1r', window_type='udef')
+    sys_typ1 = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1r', window_type=type_1)
+    sys_typ2 = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1r', window_type=type_2)
     
     # User prompts
-    stg_1_ucoop_dir = os.path.join(test_dir, 'stage_1_ucoop/')
-    stg_1_udef_dir = os.path.join(test_dir, 'stage_1_udef/')
+    stg_1_typ1_dir = os.path.join(test_dir, f'stage_1_{type_1}/')
+    stg_1_typ2_dir = os.path.join(test_dir, f'stage_1_{type_2}/')
     if test_type == 'test':
-        ucoop_response_path = os.path.join(stg_1_ucoop_dir, f't{test[5:]}_stg_1_ucoop_response.txt')
-        udef_response_path = os.path.join(stg_1_udef_dir, f't{test[5:]}_stg_1_udef_response.txt')
+        typ1_response_path = os.path.join(stg_1_typ1_dir, f't{test[5:]}_stg_1_{type_1}_response.txt')
+        typ2_response_path = os.path.join(stg_1_typ2_dir, f't{test[5:]}_stg_1_{type_2}_response.txt')
     elif test_type == 'subtest':
-        ucoop_response_path = os.path.join(stg_1_ucoop_dir, f'{test}_stg_1_ucoop_response.txt')
-        udef_response_path = os.path.join(stg_1_udef_dir, f'{test}_stg_1_udef_response.txt')
+        typ1_response_path = os.path.join(stg_1_typ1_dir, f'{test}_stg_1_{type_1}_response.txt')
+        typ2_response_path = os.path.join(stg_1_typ2_dir, f'{test}_stg_1_{type_2}_response.txt')
 
-    user_ucoop = f.file_to_string(file_path=ucoop_response_path)
-    user_udef = f.file_to_string(file_path=udef_response_path)
+    user_typ1 = f.file_to_string(file_path=typ1_response_path)
+    user_typ2 = f.file_to_string(file_path=typ2_response_path)
     
     # Aggregating prompts
-    window_prompts = [['ucoop', sys_ucoop, user_ucoop], ['udef', sys_udef, user_udef]]
+    window_prompts = [[type_1, sys_typ1, user_typ1], [type_2, sys_typ2, user_typ2]]
     
     # GPT requests
-    for i in window_prompts:  # Requests for both ucoop and udef instances
+    for i in window_prompts:  # Requests for instances
         inst_dir = os.path.join(test_dir, f'stage_1r_{i[0]}') # Creating ind. instance directory
         os.makedirs(inst_dir, exist_ok=False)
 
@@ -174,55 +182,6 @@ def stage_1r_output(treatment, test_type='test'):
         f.write_file(file_path=sys_prmpt_path, file_write=sys_prmpt)
         f.write_file(file_path=user_prmpt_path, file_write=user_prmpt)
         f.write_file(file_path=response_path, file_write=str(output))
-    return print("Stage 1r Complete")
-
-
-def stage_1r_FAR_output(treatment, test_type='test'):
-    '''
-    Stage 1 refinement function for FAR coding
-    '''
-    # Getting test directory
-    if test_type == 'test':
-        test = f.get_test_name(previous=True)
-        test_dir = os.path.join('output/', test)
-    elif test_type == 'subtest':
-        test = f.get_test_name(test_type='subtest', previous=True)
-        test_dir = os.path.join('output/_subtests/', test)
-    
-    # System prompts
-    sys = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1r', window_type='FAR')
-    
-    # User prompts
-    stg_1_dir = os.path.join(test_dir, 'stage_1/')
-    if test_type == 'test':
-        response_path = os.path.join(stg_1_dir, f't{test[5:]}_stg_1_response.txt')
-    elif test_type == 'subtest':
-        response_path = os.path.join(stg_1_dir, f'{test}_stg_1_response.txt')
-
-    user = f.file_to_string(file_path=response_path)
-    
-    # GPT requests
-    inst_dir = os.path.join(test_dir, 'stage_1r') # Creating directory
-    os.makedirs(inst_dir, exist_ok=False)
-
-    # GPT request output
-    model.set_max_tokens(2000)
-    output = model.GPT_response(sys=sys, user=user)
-
-    # Creating paths for prompts & GPT response
-    if test_type == 'test':
-        sys_prmpt_path = os.path.join(inst_dir, f't{test[5:]}_stg_1r_sys_prmpt.txt')
-        user_prmpt_path = os.path.join(inst_dir, f't{test[5:]}_stg_1r_user_prmpt.txt')
-        response_path = os.path.join(inst_dir, f't{test[5:]}_stg_1r_response.txt')
-    elif test_type == 'subtest':
-        sys_prmpt_path = os.path.join(inst_dir, f'{test}_stg_1r_sys_prmpt.txt')
-        user_prmpt_path = os.path.join(inst_dir, f'{test}_stg_1r_user_prmpt.txt')
-        response_path = os.path.join(inst_dir, f'{test}_stg_1r_response.txt')
-
-    # Writing .txt files for prompts & GPT response
-    f.write_file(file_path=sys_prmpt_path, file_write=sys)
-    f.write_file(file_path=user_prmpt_path, file_write=user)
-    f.write_file(file_path=response_path, file_write=str(output))
     return print("Stage 1r Complete")
 
 
@@ -422,8 +381,7 @@ def run_full_test(treatment, test_type, max_windows, refinement):
     
 
 # stage_1_output(treatment=, summary_type=, test_type=)
-# stage_1r_output(treatment=, test_type=)
-# stage_1r_FAR_output(treatment=, test_type=)
+# stage_1r_output(treatment=, summary_type=, test_type=)
 # stage_2_output(treatment=, test_type=, max_windows=, refinement=)
 # stage_2_FAR_output(treatment=, test_type=, max_windows=, refinement=)
 # run_full_test(treatment=, test_type=, max_windows=, refinement=)
