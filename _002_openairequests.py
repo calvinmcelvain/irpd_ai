@@ -39,27 +39,35 @@ model.set_top_p(1)
 ## Test functions ##
 ####################
 
-def stage_1_output(treatment, test_type='test'):
+def stage_1_output(treatment, summary_type, test_type='test'):
     '''
     Stage 1 function
     '''
+    # Getting prefixes base don summary type
+    if summary_type == 'FAR':
+        type_1 = 'coop'
+        type_2 = 'def'
+    else:
+        type_1 = 'ucoop'
+        type_2 = 'udef'
+    
     # System prompts
-    sys_ucoop = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1', window_type='ucoop')
-    sys_udef = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1', window_type='udef')
+    sys_typ1 = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1', window_type=type_1)
+    sys_typ2 = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1', window_type=type_2)
 
     # Summary data (User prompts)
     version = f.get_summary_version()
-    df_ucoop = pd.read_csv(f'test_data/RAsum_{treatment}_ucoop_v{version}.csv')
-    df_udef = pd.read_csv(f'test_data/RAsum_{treatment}_udef_v{version}.csv')
+    df_typ1 = pd.read_csv(f'test_data/RAsum_{treatment}_{type_1}_v{version}.csv')
+    df_typ2 = pd.read_csv(f'test_data/RAsum_{treatment}_{type_2}_v{version}.csv')
 
-    df_ucoop['window_number'] = df_ucoop['window_number'].astype(int)   # Making sure window number is an integer
-    df_udef['window_number'] = df_udef['window_number'].astype(int)
+    df_typ1['window_number'] = df_typ1['window_number'].astype(int)   # Making sure window number is an integer
+    df_typ2['window_number'] = df_typ2['window_number'].astype(int)
 
-    user_ucoop = str(df_ucoop.to_dict('records')) # Turning data into a list of dictionaries, then to string
-    user_udef = str(df_udef.to_dict('records'))
+    user_typ1 = str(df_typ1.to_dict('records')) # Turning data into a list of dictionaries, then to string
+    user_typ2 = str(df_typ2.to_dict('records'))
 
     # Aggregating prompts
-    window_prompts = [['ucoop', sys_ucoop, user_ucoop], ['udef', sys_udef, user_udef]]
+    window_prompts = [[type_1, sys_typ1, user_typ1], [type_2, sys_typ2, user_typ2]]
 
     # Making test directory
     if test_type == 'test':
@@ -74,7 +82,7 @@ def stage_1_output(treatment, test_type='test'):
     os.makedirs(test_dir, exist_ok=False)
 
     # Test info
-    info = model.test_info(test=f"Test {test[5:]}" if test_type == 'test' else f"Subtest {test}", data_name=f'RAsum_{treatment}_ucoop_v{version}.csv & RAsum_{treatment}_udef_v{version}.csv')
+    info = model.test_info(test=f"Test {test[5:]}" if test_type == 'test' else f"Subtest {test}", data_name=f'RAsum_{treatment}_{type_1}_v{version}.csv & RAsum_{treatment}_{type_2}_v{version}.csv')
     f.write_file(file_path=info_path, file_write=info)
 
     # GPT requests
@@ -104,62 +112,6 @@ def stage_1_output(treatment, test_type='test'):
         f.write_file(file_path=sys_prmpt_path, file_write=sys_prmpt)
         f.write_file(file_path=user_prmpt_path, file_write=user_prmpt)
         f.write_file(file_path=response_path, file_write=str(output))
-    return print("Stage 1 Complete")
-
-
-def stage_1_FAR_output(treatment, test_type='test'):
-    '''
-    Stage 1 function for FAR coding
-    '''
-    # System prompts
-    sys = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1', window_type='FAR')
-
-    # Summary data (User prompts)
-    version = f.get_summary_version()
-    df = pd.read_csv(f'test_data/RAsum_{treatment}_v{version}.csv')
-
-    df['window_number'] = df['window_number'].astype(int)   # Making sure window number is an integer
-
-    user = str(df.to_dict('records')) # Turning data into a list of dictionaries, then to string
-
-    # Making test directory
-    if test_type == 'test':
-        test = f.get_test_name()
-        test_dir = os.path.join('output/', test)
-        info_path = os.path.join(test_dir, f't{test[5:]}_test_info.txt')  # Test info path
-    elif test_type == 'subtest':
-        test = f.get_test_name(test_type='subtest')
-        test_dir = os.path.join('output/_subtests/', test)
-        info_path = os.path.join(test_dir, f'{test}__subtest_info.txt')  # Test info path
-
-    os.makedirs(test_dir, exist_ok=False)
-
-    # Test info
-    info = model.test_info(test=f"Test {test[5:]}" if test_type == 'test' else f"Subtest {test}", data_name=f'RAsum_{treatment}_v{version}.csv')
-    f.write_file(file_path=info_path, file_write=info)
-
-    # GPT requests
-    inst_dir = os.path.join(test_dir, 'stage_1') # Creating instance directory
-    os.makedirs(inst_dir, exist_ok=False)
-
-    # GPT request output
-    model.set_max_tokens(2000)
-    output = model.GPT_response(sys=sys, user=user)
-
-    # Creating paths for prompts & GPT response
-    if test_type == 'test':
-        sys_prmpt_path = os.path.join(inst_dir, f't{test[5:]}_stg_1_sys_prmpt.txt')
-        user_prmpt_path = os.path.join(inst_dir, f't{test[5:]}_stg_1_user_prmpt.txt')
-        response_path = os.path.join(inst_dir, f't{test[5:]}_stg_1_response.txt')
-    elif test_type == 'subtest':
-        sys_prmpt_path = os.path.join(inst_dir, f'{test}_stg_1_sys_prmpt.txt')
-        user_prmpt_path = os.path.join(inst_dir, f'{test}_stg_1_user_prmpt.txt')
-        response_path = os.path.join(inst_dir, f'{test}_stg_1_response.txt')
-
-    # Writing .txt files for prompts & GPT response
-    f.write_file(file_path=sys_prmpt_path, file_write=sys)
-    f.write_file(file_path=user_prmpt_path, file_write=user)
-    f.write_file(file_path=response_path, file_write=str(output))
     return print("Stage 1 Complete")
 
 
@@ -469,8 +421,7 @@ def run_full_test(treatment, test_type, max_windows, refinement):
     return print('Full Test Complete')
     
 
-# stage_1_output(treatment=, test_type=)
-# stage_1_FAR_output(treatment=, test_type=)
+# stage_1_output(treatment=, summary_type=, test_type=)
 # stage_1r_output(treatment=, test_type=)
 # stage_1r_FAR_output(treatment=, test_type=)
 # stage_2_output(treatment=, test_type=, max_windows=, refinement=)
