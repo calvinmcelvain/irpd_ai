@@ -231,10 +231,33 @@ def ucoop_udef_rename(df, prefix):
   return df
 
 
+def coop_def_rename(df, prefix):
+  '''
+  Adds 'coop' and 'def' prefixes to categories names in the output of the response_df
+  '''
+  remove_columns = ['summary', 'cooperation', 'window_number', 'gpt_reasoning']
+  df_dropped = df.drop(columns=remove_columns)
+  category_columns = df_dropped.columns.to_list()
+  
+  rename_dict = {col: f'{prefix}_{col}' for col in category_columns}
+  df = df.rename(columns=rename_dict)
+      
+  return df
+
+
 def final_merge_df(final_df, og_df):
   '''
   Function to get the original test dataframe variables with gpt codings & rationale
   '''
   final_df = final_df.drop(['summary', 'unilateral_cooperation'], axis=1)
+  merged_df = pd.merge(og_df, final_df, on='window_number')
+  return merged_df
+
+
+def final_merge_df_FAR(final_df, og_df):
+  '''
+  Function to get the original test dataframe variables with gpt codings & rationale for FAR coding
+  '''
+  final_df = final_df.drop(['summary', 'cooperation'], axis=1)
   merged_df = pd.merge(og_df, final_df, on='window_number')
   return merged_df

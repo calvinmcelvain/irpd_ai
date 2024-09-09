@@ -185,10 +185,18 @@ def stage_1r_output(treatment, summary_type, test_type='test'):
     return print("Stage 1r Complete")
 
 
-def stage_2_output(treatment, max_windows=None, test_type='test', refinement=True):
+def stage_2_output(treatment, summary_type, max_windows=None, test_type='test', refinement=True):
     '''
     Stage 2 function
     '''
+    # Getting prefixes base don summary type
+    if summary_type == 'FAR':
+        type_1 = 'coop'
+        type_2 = 'def'
+    else:
+        type_1 = 'ucoop'
+        type_2 = 'udef'
+    
     # Getting test directory
     if test_type == 'test':
         test = f.get_test_name(previous=True)
@@ -198,42 +206,42 @@ def stage_2_output(treatment, max_windows=None, test_type='test', refinement=Tru
         test_dir = os.path.join('output/_subtests/', test)
 
     # System Prompts
-    stg_2_ucoop_sys = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_2', window_type='ucoop') # Getting system prompts for stage 2
-    stg_2_udef_sys = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_2', window_type='udef')
+    stg_2_typ1_sys = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_2', window_type=type_1) # Getting system prompts for stage 2
+    stg_2_typ2_sys = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_2', window_type=type_2)
 
     ## Getting Stage 1 response to merge with Stage 2 system prompt
-    stage = '1' if refinement == False else '1r'
-    stg_1_ucoop_dir = os.path.join(test_dir, f'stage_{stage}_ucoop/')
-    stg_1_udef_dir = os.path.join(test_dir, f'stage_{stage}_udef/')
+    stage = '1' if refinement == False else '1r'    # Grabbing the response from either Stage 1 or Stage 1 refined
+    stg_1_typ1_dir = os.path.join(test_dir, f'stage_{stage}_{type_1}/')
+    stg_1_typ2_dir = os.path.join(test_dir, f'stage_{stage}_{type_2}/')
     if test_type == 'test':
-        ucoop_response_path = os.path.join(stg_1_ucoop_dir, f't{test[5:]}_stg_{stage}_ucoop_response.txt')
-        udef_response_path = os.path.join(stg_1_udef_dir, f't{test[5:]}_stg_{stage}_udef_response.txt')
+        typ1_response_path = os.path.join(stg_1_typ1_dir, f't{test[5:]}_stg_{stage}_{type_1}_response.txt')
+        typ2_response_path = os.path.join(stg_1_typ2_dir, f't{test[5:]}_stg_{stage}_{type_2}_response.txt')
     elif test_type == 'subtest':
-        ucoop_response_path = os.path.join(stg_1_ucoop_dir, f'{test}_stg_{stage}_ucoop_response.txt')
-        udef_response_path = os.path.join(stg_1_udef_dir, f'{test}_stg_{stage}_udef_response.txt')
+        typ1_response_path = os.path.join(stg_1_typ1_dir, f'{test}_stg_{stage}_{type_1}_response.txt')
+        typ2_response_path = os.path.join(stg_1_typ2_dir, f'{test}_stg_{stage}_{type_2}_response.txt')
 
-    ucoop_response = f.file_to_string(file_path=ucoop_response_path)
-    udef_response = f.file_to_string(file_path=udef_response_path)
+    typ1_response = f.file_to_string(file_path=typ1_response_path)
+    typ2_response = f.file_to_string(file_path=typ2_response_path)
 
-    sys_ucoop = stg_2_ucoop_sys + '\n' + ucoop_response   # Final system prompts
-    sys_udef = stg_2_udef_sys + '\n' + udef_response
+    sys_typ1 = stg_2_typ1_sys + '\n' + typ1_response   # Final system prompts
+    sys_typ2 = stg_2_typ2_sys + '\n' + typ2_response
 
     # Summary data (User prompts)
     version = f.get_summary_version()
-    df_ucoop = pd.read_csv(f'test_data/RAsum_{treatment}_ucoop_v{version}.csv')
-    df_udef = pd.read_csv(f'test_data/RAsum_{treatment}_udef_v{version}.csv')
+    df_typ1 = pd.read_csv(f'test_data/RAsum_{treatment}_{type_1}_v{version}.csv')
+    df_typ2 = pd.read_csv(f'test_data/RAsum_{treatment}_{type_2}_v{version}.csv')
 
-    df_ucoop['window_number'] = df_ucoop['window_number'].astype(int)   # Making sure window number is an integer
-    df_udef['window_number'] = df_udef['window_number'].astype(int)
+    df_typ1['window_number'] = df_typ1['window_number'].astype(int)   # Making sure window number is an integer
+    df_typ2['window_number'] = df_typ2['window_number'].astype(int)
 
-    df_ucoop = df_ucoop[:max_windows] if max_windows != None else df_ucoop  # Adjusting to max windows for Stage 2
-    df_udef = df_udef[:max_windows] if max_windows != None else df_udef
+    df_typ1 = df_typ1[:max_windows] if max_windows != None else df_typ1  # Adjusting to max windows for Stage 2
+    df_typ2 = df_typ2[:max_windows] if max_windows != None else df_typ2
 
     # Aggregating prompts
-    window_prompts = [['ucoop', sys_ucoop, df_ucoop], ['udef', sys_udef, df_udef]]
+    window_prompts = [[type_1, sys_typ1, df_typ1], [type_2, sys_typ2, df_typ2]]
 
     for i in window_prompts:
-        # Requests for both ucoop and udef instances
+        # Requests for instances
         inst_dir = os.path.join(test_dir, f'stage_2_{i[0]}') # Creating ind. instance directory
         os.makedirs(inst_dir, exist_ok=False)
 
@@ -271,20 +279,30 @@ def stage_2_output(treatment, max_windows=None, test_type='test', refinement=Tru
             f.write_file(output_path, str(output))
 
         # Prelimaries to final output
-        if i[0] == 'ucoop':
-            df['unilateral_cooperation'] = 1
-            ucoop_df = f.response_df(response_dir=response_path, test_df=df)  # Coding GPT classifications for ucoop instances
-            ucoop_df = f.ucoop_udef_rename(ucoop_df, 'ucoop') # Adding ucoop prefix to categories
+        if i[0] == type_1:
+            if summary_type == 'FAR':
+                df['cooperation'] = 1
+                typ1_df = f.response_df(response_dir=response_path, test_df=df)  # Coding GPT classifications for ucoop instances
+                typ1_df = f.coop_def_rename(typ1_df, type_1) # Adding ucoop prefix to categories
+            else:
+                df['unilateral_cooperation'] = 1
+                typ1_df = f.response_df(response_dir=response_path, test_df=df)  # Coding GPT classifications for ucoop instances
+                typ1_df = f.ucoop_udef_rename(typ1_df, type_1) # Adding ucoop prefix to categories
         else:
-            df['unilateral_cooperation'] = 0
-            udef_df = f.response_df(response_dir=response_path, test_df=df)   # Coding GPT classifications for udef instances
-            udef_df = f.ucoop_udef_rename(udef_df, 'udef')    # Adding udef prefix to categories
+            if summary_type == 'FAR':
+                df['cooperation'] = 0
+                typ2_df = f.response_df(response_dir=response_path, test_df=df)   # Coding GPT classifications for udef instances
+                typ2_df = f.coop_def_rename(typ2_df, type_2)    # Adding udef prefix to categories
+            else:
+                df['unilateral_cooperation'] = 0
+                typ2_df = f.response_df(response_dir=response_path, test_df=df)   # Coding GPT classifications for udef instances
+                typ2_df = f.ucoop_udef_rename(typ2_df, type_2)    # Adding udef prefix to categories
 
     # Final output dataframe
-    GPT_df = pd.concat([ucoop_df, udef_df], ignore_index=True, sort=False)
+    GPT_df = pd.concat([typ1_df, typ2_df], ignore_index=True, sort=False)
     GPT_df = GPT_df.fillna(0)
     og_df = pd.read_csv(f'raw_data/RAsum_{treatment}_v{version}.csv')
-    final_df = f.final_merge_df(GPT_df, og_df)
+    final_df = f.final_merge_df_FAR(GPT_df, og_df) if summary_type == 'FAR' else f.final_merge_df(GPT_df, og_df)
     final_out_path = os.path.join(test_dir, f"t{test[5:]}_final_output.csv" if test_type == 'test' else f"{test}_final_output.csv")
     final_df.to_csv(final_out_path, index=False)
     return print("Stage 2 Complete")
@@ -372,16 +390,15 @@ def stage_2_FAR_output(treatment, max_windows=None, test_type='test', refinement
     return print("Stage 2 Complete")
 
 
-def run_full_test(treatment, test_type, max_windows, refinement):
-    stage_1_output(treatment=treatment, test_type=test_type)
+def run_full_test(treatment, summary_type, test_type, max_windows, refinement):
+    stage_1_output(treatment=treatment, summary_type=summary_type, test_type=test_type)
     if refinement == True:
-        stage_1r_output(treatment=treatment, test_type=test_type)
-    stage_2_output(treatment=treatment, test_type=test_type, max_windows=max_windows, refinement=refinement)
+        stage_1r_output(treatment=treatment, summary_type=summary_type, test_type=test_type)
+    stage_2_output(treatment=treatment, summary_type=summary_type, test_type=test_type, max_windows=max_windows, refinement=refinement)
     return print('Full Test Complete')
     
 
 # stage_1_output(treatment=, summary_type=, test_type=)
 # stage_1r_output(treatment=, summary_type=, test_type=)
-# stage_2_output(treatment=, test_type=, max_windows=, refinement=)
-# stage_2_FAR_output(treatment=, test_type=, max_windows=, refinement=)
-# run_full_test(treatment=, test_type=, max_windows=, refinement=)
+# stage_2_output(treatment=, summary_type=, test_type=, max_windows=, refinement=)
+# run_full_test(treatment=, summary_type=, test_type=, max_windows=, refinement=)
