@@ -24,7 +24,7 @@ def file_to_string(file_path: str):
   return str(k)
 
 
-def write_file(file_path: str, file_write: str):
+def write_file(file_path: str, file_write: any):
   '''
   Writes files to path
   '''
@@ -129,6 +129,15 @@ def create_test_directory(test_type: str, test: str):
     test_dir = os.path.join('output/_subtests/', test)
   os.makedirs(test_dir, exist_ok=True)
   return test_dir
+
+
+def write_test_info(test_info: dict, dir:str):
+  test_info_file = ""
+  for i in test_info:
+    test_info_file += str(i)
+  
+  write_file(file_path=dir, file_write=test_info_file)
+
 
 ######################################
 ## Data Prep and Trimming Functions ##
