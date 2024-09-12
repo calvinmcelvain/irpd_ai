@@ -87,6 +87,6 @@ class GPT:
                 {"role": "user", "content": str(user)}
             ]
         )
-        response = response.choices[0].message.content  # GPT response var
+        gpt_response = response.choices[0].message.content  # GPT response var
         response_data = response
-        return response, response_data
+        return gpt_response, response_data
