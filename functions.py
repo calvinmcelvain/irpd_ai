@@ -15,7 +15,7 @@ import re
 ## Simple Helper Functions ##
 #############################
 
-def file_to_string(file_path):
+def file_to_string(file_path: str):
   '''
   Reads file and returns its contents as a string
   '''
@@ -24,7 +24,7 @@ def file_to_string(file_path):
   return str(k)
 
 
-def write_file(file_path, file_write):
+def write_file(file_path: str, file_write: str):
   '''
   Writes files to path
   '''
@@ -65,7 +65,7 @@ def get_test_name(test_type='test', previous=False):
   return test_name
 
 
-def get_cat_number(stage_dir, previous=False):
+def get_cat_number(stage_dir: str, previous=False):
   '''
   Returns the next/latest category name (if previous is False, it returns next category name)
   '''
@@ -79,7 +79,7 @@ def get_cat_number(stage_dir, previous=False):
   return cat_number
 
 
-def create_system_prompt(approach, treatment, stage, window_type, general_task_overview=True, experiment_context=True, summary_context=True, task=True, constraints=True, output_format=True, data_var=True):
+def create_system_prompt(approach: str, treatment: str, stage: str, window_type: str, general_task_overview=True, experiment_context=True, summary_context=True, task=True, constraints=True, output_format=True, data_var=True):
   '''
   Function to create the system prompt based on the approach, stage, and treatment
   '''
@@ -108,7 +108,26 @@ def create_system_prompt(approach, treatment, stage, window_type, general_task_o
   
   return sys_prompt
     
+def get_window_types(summary_type: str):
+  '''
+  Get window types based on summary_type.
+  '''
+  if summary_type == 'FAR':
+    return 'coop', 'def'
+  else:
+    return 'ucoop', 'udef'
 
+
+def create_test_directory(test_type: str):
+  '''
+  Create a test directory based on the test type.
+  '''
+  if test_type == 'test':
+    test_dir = os.path.join('output/', test)
+  else:
+    test_dir = os.path.join('output/_subtests/', test)
+  os.makedirs(test_dir, exist_ok=True)
+  return test_dir
 
 ######################################
 ## Data Prep and Trimming Functions ##
@@ -131,7 +150,7 @@ def trim(df, cols):
   return df
 
 
-def test_summaries(df, type):
+def test_summaries(df, type: str):
   '''
   Function to seperate the trim data into ucoop/udef or coop/def test dfs based on summary type
   '''
@@ -161,7 +180,7 @@ def ucoop_udef_windows(df):
 ## Final Output Data Functions ##
 #################################
 
-def extract_dict_from_file(file_path):
+def extract_dict_from_file(file_path: str):
   '''
   Takes Stage 2 GPT reponses and extracts the Python dictionary. Then creates a new dictionary that includes a binary variables for each assigned category and a variable for the GPT reasoning
   '''
@@ -197,7 +216,7 @@ def extract_dict_from_file(file_path):
   return data_dict
 
 
-def response_df(response_dir, test_df):
+def response_df(response_dir: str, test_df: str):
   '''
   Takes each GPT response for Stage 2 and runs it through extract_dict_from_file funtion. Returns a dataframe of the category codings and GPT reasoning (to do this, also need the test data used for stage 2, i.e., test_df)
   '''
@@ -217,7 +236,7 @@ def response_df(response_dir, test_df):
   return df
 
 
-def ucoop_udef_rename(df, prefix):
+def ucoop_udef_rename(df, prefix: str):
   '''
   Adds 'ucoop' and 'udef' prefixes to categories names in the output of the response_df
   '''
@@ -231,7 +250,7 @@ def ucoop_udef_rename(df, prefix):
   return df
 
 
-def coop_def_rename(df, prefix):
+def coop_def_rename(df, prefix: str):
   '''
   Adds 'coop' and 'def' prefixes to categories names in the output of the response_df
   '''
