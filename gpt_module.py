@@ -87,26 +87,6 @@ class GPT:
                 {"role": "user", "content": str(user)}
             ]
         )
-        output = response.choices[0].message.content  # GPT response var
-        return output
-
-
-    def test_info(self, test, data_name):
-        '''
-        Returns test information
-        '''
-        info = str(
-            'ChatGPT Model Information:' + '\n' +
-            'format: OpenAI API' + '\n' +
-            'model: ' + str(self.MODEL) + '\n' +
-            'temperature: ' + str(self.TEMPERATURE) + '\n' +
-            'max tokens: ' + str(self.MAX_TOKENS) + '\n' +
-            'top p: ' + str(self.TOP_P) + '\n' +
-            'frequency penalty: ' + str(self.FREQUENCY_PENALTY) + '\n' +
-            'presence penalty: ' + str(self.PRESENCE_PENALTY) + '\n\n' +
-            'Test Information:' + '\n' +
-            'test: ' + test + '\n' +
-            'data: ' + data_name + '\n' +
-            'date: ' + str(date.today()) + '\n'
-        )
-        return info
+        chat_output = response.choices[0].message.content  # GPT response var
+        output_data = response
+        return chat_output, output_data
