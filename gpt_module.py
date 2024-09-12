@@ -87,6 +87,6 @@ class GPT:
                 {"role": "user", "content": str(user)}
             ]
         )
-        chat_output = response.choices[0].message.content  # GPT response var
-        output_data = response
-        return chat_output, output_data
+        response = response.choices[0].message.content  # GPT response var
+        response_data = response
+        return response, response_data
