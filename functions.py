@@ -107,7 +107,8 @@ def create_system_prompt(approach: str, treatment: str, stage: str, window_type:
     sys_prompt += section + '\n' if section != '' else section
   
   return sys_prompt
-    
+
+
 def get_window_types(summary_type: str):
   '''
   Get window types based on summary_type.
@@ -118,7 +119,7 @@ def get_window_types(summary_type: str):
     return 'ucoop', 'udef'
 
 
-def create_test_directory(test_type: str):
+def create_test_directory(test_type: str, test: str):
   '''
   Create a test directory based on the test type.
   '''
