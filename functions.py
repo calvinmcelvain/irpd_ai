@@ -120,7 +120,7 @@ def get_window_types(summary_type: str):
     return 'ucoop', 'udef'
 
 
-def create_test_directory(test_type: str, test: str):
+def get_test_directory(test_type: str, test: str):
   '''
   Create a test directory based on the test type.
   '''
