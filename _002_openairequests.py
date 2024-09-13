@@ -12,6 +12,7 @@ from gpt_key import key
 import functions as f
 import gpt_module
 import pandas as pd
+import numpy as np
 import importlib
 importlib.reload(f)
 importlib.reload(gpt_module)
@@ -106,7 +107,7 @@ def stage_1r_output(treatment, summary_type, test_type='test'):
     # Getting prefixes base don summary type
     type_1, type_2 = f.get_window_types(summary_type=summary_type)
     
-    # Gettimng test directory
+    # Getting test directory
     test = f.get_test_name(test_type=test_type, previous=True)
     test_number = test[5:] if test_type == 'test' else test
     test_dir = f.get_test_directory(test_type=test_type, test=test)
@@ -142,9 +143,9 @@ def stage_1r_output(treatment, summary_type, test_type='test'):
         info_data[i[0]] = response_data     # Appending response data
 
         # Creating paths for prompts & GPT response
-        sys_prmpt_path = os.path.join(inst_dir, f'{test_number}_stg_1r_{i[0]}_sys_prmpt.txt')
-        user_prmpt_path = os.path.join(inst_dir, f'{test_number}_stg_1r_{i[0]}_user_prmpt.txt')
-        response_path = os.path.join(inst_dir, f'{test_number}_stg_1r_{i[0]}_response.txt')
+        sys_prmpt_path = os.path.join(inst_dir, f't{test_number}_stg_1r_{i[0]}_sys_prmpt.txt')
+        user_prmpt_path = os.path.join(inst_dir, f't{test_number}_stg_1r_{i[0]}_user_prmpt.txt')
+        response_path = os.path.join(inst_dir, f't{test_number}_stg_1r_{i[0]}_response.txt')
 
         # Writing .txt files for prompts & GPT response
         f.write_file(file_path=sys_prmpt_path, file_write=sys_prmpt)
@@ -160,20 +161,12 @@ def stage_2_output(treatment, summary_type, max_windows=None, test_type='test', 
     Stage 2 function
     '''
     # Getting prefixes base don summary type
-    if summary_type == 'FAR':
-        type_1 = 'coop'
-        type_2 = 'def'
-    else:
-        type_1 = 'ucoop'
-        type_2 = 'udef'
+    type_1, type_2 = f.get_window_types(summary_type=summary_type)
     
     # Getting test directory
-    if test_type == 'test':
-        test = f.get_test_name(previous=True)
-        test_dir = os.path.join('output/', test)
-    elif test_type == 'subtest':
-        test = f.get_test_name(test_type='subtest', previous=True)
-        test_dir = os.path.join('output/_subtests/', test)
+    test = f.get_test_name(test_type=test_type, previous=True)
+    test_number = test[5:] if test_type == 'test' else test
+    test_dir = f.get_test_directory(test_type=test_type, test=test)
 
     # System Prompts
     stg_2_typ1_sys = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_2', window_type=type_1) # Getting system prompts for stage 2
@@ -183,12 +176,8 @@ def stage_2_output(treatment, summary_type, max_windows=None, test_type='test', 
     stage = '1' if refinement == False else '1r'    # Grabbing the response from either Stage 1 or Stage 1 refined
     stg_1_typ1_dir = os.path.join(test_dir, f'stage_{stage}_{type_1}/')
     stg_1_typ2_dir = os.path.join(test_dir, f'stage_{stage}_{type_2}/')
-    if test_type == 'test':
-        typ1_response_path = os.path.join(stg_1_typ1_dir, f't{test[5:]}_stg_{stage}_{type_1}_response.txt')
-        typ2_response_path = os.path.join(stg_1_typ2_dir, f't{test[5:]}_stg_{stage}_{type_2}_response.txt')
-    elif test_type == 'subtest':
-        typ1_response_path = os.path.join(stg_1_typ1_dir, f'{test}_stg_{stage}_{type_1}_response.txt')
-        typ2_response_path = os.path.join(stg_1_typ2_dir, f'{test}_stg_{stage}_{type_2}_response.txt')
+    typ1_response_path = os.path.join(stg_1_typ1_dir, f't{test_number}_stg_{stage}_{type_1}_response.txt')
+    typ2_response_path = os.path.join(stg_1_typ2_dir, f't{test_number}_stg_{stage}_{type_2}_response.txt')
 
     typ1_response = f.file_to_string(file_path=typ1_response_path)
     typ2_response = f.file_to_string(file_path=typ2_response_path)
@@ -209,14 +198,15 @@ def stage_2_output(treatment, summary_type, max_windows=None, test_type='test', 
 
     # Aggregating prompts
     window_prompts = [[type_1, sys_typ1, df_typ1], [type_2, sys_typ2, df_typ2]]
-
+    
+    info_data = {type_1: 0, type_2: 0}      # Initializing info data
     for i in window_prompts:
         # Requests for instances
         inst_dir = os.path.join(test_dir, f'stage_2_{i[0]}') # Creating ind. instance directory
         os.makedirs(inst_dir, exist_ok=False)
 
         sys_prmpt = i[1]    # System prompt for ucoop or udef data
-        sys_prmpt_path = os.path.join(inst_dir, f't{test[5:]}_stg_2_{i[0]}_sys_prmpt.txt') if test_type == 'test' else os.path.join(inst_dir, f'{test}_stg_2_{i[0]}_sys_prmpt.txt')
+        sys_prmpt_path = os.path.join(inst_dir, f't{test_number}_stg_2_{i[0]}_sys_prmpt.txt') 
         f.write_file(file_path=sys_prmpt_path, file_write=sys_prmpt)
 
         # Prompt & Response paths
@@ -224,6 +214,11 @@ def stage_2_output(treatment, summary_type, max_windows=None, test_type='test', 
         response_path = os.path.join(inst_dir, 'responses')
         os.makedirs(prompt_path, exist_ok=True)
         os.makedirs(response_path, exist_ok=True)
+        
+        # Initializing tokens to later average
+        completion_tok = []
+        prompt_tok = []
+        total_tok = []
 
         # Requesting chat completion for each row
         df = i[2]   # Test data for ucoop or udef data
@@ -232,22 +227,32 @@ def stage_2_output(treatment, summary_type, max_windows=None, test_type='test', 
             
             # GPT request output
             model.set_max_tokens(600)
-            output = model.GPT_response(sys_prmpt, str(row))
+            response, response_data = model.GPT_response(sys=sys_prmpt, user=str(row))
+            if k == 1:
+                info_data[i[0]] = response_data     # Appending response data
+            
+            # Appending all values of token usage
+            completion_tok.append(response_data.usage.completion_tokens)
+            prompt_tok.append(response_data.usage.prompt_tokens)
+            total_tok.append(response_data.usage.total_tokens)
             
             # Creating paths for prompts & GPT responses using window_numbers
             window_number = row['window_number']
-            
-            if test_type == 'test':
-                user_prmpt_path = os.path.join(prompt_path, f't{test[5:]}_{window_number}_user_prmpt.txt')
-                output_path = os.path.join(response_path, f't{test[5:]}_{window_number}_response.txt')
-            elif test_type == 'subtest':
-                user_prmpt_path = os.path.join(prompt_path, f'{test}_{window_number}_user_prmpt.txt')
-                output_path = os.path.join(response_path, f'{test}_{window_number}_response.txt')
+            user_prmpt_path = os.path.join(prompt_path, f't{test_number}_{window_number}_user_prmpt.txt')
+            output_path = os.path.join(response_path, f't{test_number}_{window_number}_response.txt')
             
             # Writing .txt files for prompts & GPT response
             f.write_file(user_prmpt_path, str(row))
-            f.write_file(output_path, str(output))
+            f.write_file(output_path, str(response))
 
+        # Gettting average (mean) of usage tokens and overwriting current value
+        mcompletion_tok = np.mean(completion_tok)
+        mprompt_tok = np.mean(prompt_tok)
+        mtotal_tok = np.mean(total_tok)
+        info_data[i[0]].usage.completion_tokens = mcompletion_tok
+        info_data[i[0]].usage.prompt_tokens = mprompt_tok
+        info_data[i[0]].usage.total_tokens = mtotal_tok
+        
         # Prelimaries to final output
         if i[0] == type_1:
             if summary_type == 'FAR':
@@ -275,6 +280,8 @@ def stage_2_output(treatment, summary_type, max_windows=None, test_type='test', 
     final_df = f.final_merge_df_FAR(GPT_df, og_df) if summary_type == 'FAR' else f.final_merge_df(GPT_df, og_df)
     final_out_path = os.path.join(test_dir, f"t{test[5:]}_final_output.csv" if test_type == 'test' else f"{test}_final_output.csv")
     final_df.to_csv(final_out_path, index=False)
+    
+    f.write_test_info(test_info=info_data, directory=test_dir, test_number=test_number, model_info=model, stage_number = '2')    # Writing test information
     return print("Stage 2 Complete")
 
 

@@ -139,7 +139,7 @@ def write_test_info(test_info: dict, directory: str, test_number: str, model_inf
   test_info_file += f" Max-tokens: {model_info.MAX_TOKENS} \n"
   test_info_file += f" Top-p: {model_info.TOP_P} \n"
   test_info_file += f" Frequency penalty: {model_info.FREQUENCY_PENALTY} \n"
-  test_info_file += f" Presence penalty: {model_info.PRESENCE_PENALTY} \n\n"
+  test_info_file += f" Presence penalty: {model_info.PRESENCE_PENALTY} \n\n\n"
   
   # Initialize a string to store formatted test info content
   test_info_file += "TEST INFORMATION:\n\n"
