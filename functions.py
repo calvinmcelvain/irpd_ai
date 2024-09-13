@@ -132,7 +132,7 @@ def get_test_directory(test_type: str, test: str):
   return test_dir
 
 
-def write_test_info(test_info: dict, directory: str, test_number: str, model_info: any, stage_number: int):
+def write_test_info(test_info: dict, directory: str, test_number: str, model_info: any, stage_number: str):
   test_info_file = "MODEL INFORMATION: \n\n"
   test_info_file += f" Model: {model_info.MODEL} \n"
   test_info_file += f" Termperature: {model_info.TEMPERATURE} \n"
@@ -158,7 +158,7 @@ def write_test_info(test_info: dict, directory: str, test_number: str, model_inf
     
 
   # Define the directory and file path for the test info file
-  info_dir = os.path.join(directory, f't{test_number}_stg{str(stage_number)}_test_info.txt')
+  info_dir = os.path.join(directory, f't{test_number}_stg{stage_number}_test_info.txt')
 
   # Write the formatted test info to the file
   write_file(file_path=info_dir, file_write=test_info_file)
