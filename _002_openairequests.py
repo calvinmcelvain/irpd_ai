@@ -95,7 +95,7 @@ def stage_1_output(treatment: str, summary_type: str, test_type='test'):
         f.write_file(file_path=user_prmpt_path, file_write=user_prmpt)
         f.write_file(file_path=response_path, file_write=str(response))
     
-    f.write_test_info(test_info=info_data, dir=test_dir, test_number=test_number, model_info=model)    # Writing test information
+    f.write_test_info(test_info=info_data, directory=test_dir, test_number=test_number, model_info=model, stage_number = 1)    # Writing test information
     return print("Stage 1 Complete")
 
 
