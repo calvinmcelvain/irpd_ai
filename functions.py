@@ -150,11 +150,12 @@ def write_test_info(test_info: dict, directory: str, test_number: str, model_inf
   test_info_file += f' System fingerprint: {test_info[first_key].system_fingerprint}\n'
 
   # Loop through each window
+  average = '(average) ' if stage_number == '2' else ''
   for key, value in test_info.items():
     test_info_file += f" {key.upper()} PROMPT USAGE: \n"
-    test_info_file += f"   Completion tokens: {value.usage.completion_tokens} \n"
-    test_info_file += f"   Prompt tokens: {value.usage.prompt_tokens} \n"
-    test_info_file += f"   Total tokens: {value.usage.total_tokens} \n"
+    test_info_file += f"   {average}Completion tokens: {value.usage.completion_tokens} \n"
+    test_info_file += f"   {average}Prompt tokens: {value.usage.prompt_tokens} \n"
+    test_info_file += f"   {average}Total tokens: {value.usage.total_tokens} \n"
     
 
   # Define the directory and file path for the test info file
