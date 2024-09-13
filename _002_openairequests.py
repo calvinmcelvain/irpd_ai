@@ -8,12 +8,13 @@ os.chdir('/Users/fogellmcmuffin/Documents/ra/team_discussions/AI/')     # Workin
 
 # Modules & Packages
 sys.path.append('/Users/fogellmcmuffin/Documents/ra/team_discussions/AI/code/')
-from gpt_module import GPT
 from gpt_key import key
 import functions as f
+import gpt_module
 import pandas as pd
 import importlib
 importlib.reload(f)
+importlib.reload(gpt_module)
 
 
 ########################
@@ -21,7 +22,7 @@ importlib.reload(f)
 ########################
 
 
-model = GPT(
+model = gpt_module.GPT(
     api_key=key,
     organization='org-WLFAmqjnKmywM0wd6loMyGJq',
     project='proj_vOr6WeeCFk5IjZLCdksFLWUd',
@@ -39,17 +40,12 @@ model.set_top_p(1)
 ## Test functions ##
 ####################
 
-def stage_1_output(treatment, summary_type, test_type='test'):
+def stage_1_output(treatment: str, summary_type: str, test_type='test'):
     '''
     Stage 1 function
     '''
     # Getting prefixes base don summary type
-    if summary_type == 'FAR':
-        type_1 = 'coop'
-        type_2 = 'def'
-    else:
-        type_1 = 'ucoop'
-        type_2 = 'udef'
+    type_1, type_2 = f.get_window_types(summary_type=summary_type)
     
     # System prompts
     sys_typ1 = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1', window_type=type_1)
@@ -70,22 +66,12 @@ def stage_1_output(treatment, summary_type, test_type='test'):
     window_prompts = [[type_1, sys_typ1, user_typ1], [type_2, sys_typ2, user_typ2]]
 
     # Making test directory
-    if test_type == 'test':
-        test = f.get_test_name()
-        test_dir = os.path.join('output/', test)
-        info_path = os.path.join(test_dir, f't{test[5:]}_test_info.txt')  # Test info path
-    elif test_type == 'subtest':
-        test = f.get_test_name(test_type='subtest')
-        test_dir = os.path.join('output/_subtests/', test)
-        info_path = os.path.join(test_dir, f'{test}__subtest_info.txt')  # Test info path
-
-    os.makedirs(test_dir, exist_ok=False)
-
-    # Test info
-    info = model.test_info(test=f"Test {test[5:]}" if test_type == 'test' else f"Subtest {test}", data_name=f'RAsum_{treatment}_{type_1}_v{version}.csv & RAsum_{treatment}_{type_2}_v{version}.csv')
-    f.write_file(file_path=info_path, file_write=info)
+    test = f.get_test_name(test_type=test_type)
+    test_number = test[5:] if test_type == 'test' else test
+    test_dir = f.create_test_directory(test_type=test_type, test=test)
 
     # GPT requests
+    info_data = {type_1: 0, type_2: 0}      # Initializing info data
     for i in window_prompts:  # Requests for instances
         inst_dir = os.path.join(test_dir, f'stage_1_{i[0]}') # Creating ind. instance directory
         os.makedirs(inst_dir, exist_ok=False)
@@ -96,22 +82,20 @@ def stage_1_output(treatment, summary_type, test_type='test'):
 
         # GPT request output
         model.set_max_tokens(2000)
-        output = model.GPT_response(sys=sys_prmpt, user=user_prmpt)
-
+        response, response_data = model.GPT_response(sys=sys_prmpt, user=user_prmpt)
+        info_data[i[0]] = response_data     # Appending response data
+        
         # Creating paths for prompts & GPT response
-        if test_type == 'test':
-            sys_prmpt_path = os.path.join(inst_dir, f't{test[5:]}_stg_1_{i[0]}_sys_prmpt.txt')
-            user_prmpt_path = os.path.join(inst_dir, f't{test[5:]}_stg_1_{i[0]}_user_prmpt.txt')
-            response_path = os.path.join(inst_dir, f't{test[5:]}_stg_1_{i[0]}_response.txt')
-        elif test_type == 'subtest':
-            sys_prmpt_path = os.path.join(inst_dir, f'{test}_stg_1_{i[0]}_sys_prmpt.txt')
-            user_prmpt_path = os.path.join(inst_dir, f'{test}_stg_1_{i[0]}_user_prmpt.txt')
-            response_path = os.path.join(inst_dir, f'{test}_stg_1_{i[0]}_response.txt')
+        sys_prmpt_path = os.path.join(inst_dir, f't{test_number}_stg_1_{i[0]}_sys_prmpt.txt')
+        user_prmpt_path = os.path.join(inst_dir, f't{test_number}_stg_1_{i[0]}_user_prmpt.txt')
+        response_path = os.path.join(inst_dir, f't{test_number}_stg_1_{i[0]}_response.txt')
 
         # Writing .txt files for prompts & GPT response
         f.write_file(file_path=sys_prmpt_path, file_write=sys_prmpt)
         f.write_file(file_path=user_prmpt_path, file_write=user_prmpt)
-        f.write_file(file_path=response_path, file_write=str(output))
+        f.write_file(file_path=response_path, file_write=str(response))
+    
+    f.write_test_info(test_info=info_data, dir=test_dir, test_number=test_number, model_info=model)    # Writing test information
     return print("Stage 1 Complete")
 
 

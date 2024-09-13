@@ -5,7 +5,6 @@ import os
 
 # Modules & Packages
 from openai import OpenAI
-from datetime import date
 
 
 class GPT:

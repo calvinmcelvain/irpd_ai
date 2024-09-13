@@ -7,6 +7,7 @@ os.chdir('/Users/fogellmcmuffin/Documents/ra/team_discussions/AI/')   # Working 
 
 # Modules & Packages
 import pandas as pd
+from datetime import datetime
 import ast
 import re 
 
@@ -131,12 +132,36 @@ def create_test_directory(test_type: str, test: str):
   return test_dir
 
 
-def write_test_info(test_info: dict, dir:str):
-  test_info_file = ""
-  for i in test_info:
-    test_info_file += str(i)
+def write_test_info(test_info: dict, dir: str, test_number: str, model_info: any):
+  test_info_file = "MODEL INFORMATION: \n\n"
+  test_info_file += f"\t Model: {model_info.MODEL} \n"
+  test_info_file += f"\t Termperature: {model_info.TEMPERATURE} \n"
+  test_info_file += f"\t Max-tokens: {model_info.MAX_TOKENS} \n"
+  test_info_file += f"\t Top-p: {model_info.TOP_P} \n"
+  test_info_file += f"\t Frequency penalty: {model_info.FREQUENCY_PENALTY} \n"
+  test_info_file += f"\t Presence penalty: {model_info.PRESENCE_PENALTY} \n\n"
   
-  write_file(file_path=dir, file_write=test_info_file)
+  # Initialize a string to store formatted test info content
+  test_info_file += "TEST INFORMATION:\n\n"
+  
+  # Getting test time
+  first_key = next(iter(test_info))
+  test_info_file += f'\t Test date/time: {datetime.fromtimestamp(test_info[first_key].created).strftime('%Y-%m-%d %H:%M:%S')} \n'
+  test_info_file += f'\t System fingerprint: {test_info[first_key].system_fingerprint}\n'
+
+  # Loop through each window
+  for key, value in test_info.items():
+    test_info_file += f"\t {key.capitalize()} information: \n"
+    test_info_file += f"\t \t Completion tokens: {value.usage.completion_tokens} \n"
+    test_info_file += f"\t \t Prompt tokens: {value.usage.prompt_tokens} \n"
+    test_info_file += f"\t \t Total tokens: {value.usage.total_tokens} \n"
+    
+
+  # Define the directory and file path for the test info file
+  info_dir = os.path.join(dir, f't{test_number}_test_info.txt')
+
+  # Write the formatted test info to the file
+  write_file(file_path=info_dir, file_write=test_info_file)
 
 
 ######################################
