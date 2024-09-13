@@ -147,11 +147,11 @@ def write_test_info(test_info: dict, directory: str, test_number: str, model_inf
   # Getting test time
   first_key = next(iter(test_info))
   test_info_file += f' Test date/time: {datetime.fromtimestamp(test_info[first_key].created).strftime('%Y-%m-%d %H:%M:%S')} \n'
-  test_info_file += f' System fingerprint: {test_info[first_key].system_fingerprint}\n\n'
+  test_info_file += f' System fingerprint: {test_info[first_key].system_fingerprint}\n'
 
   # Loop through each window
   for key, value in test_info.items():
-    test_info_file += f" {key.upper()} INFORMATION: \n"
+    test_info_file += f" {key.upper()} PROMPT USAGE: \n"
     test_info_file += f"   Completion tokens: {value.usage.completion_tokens} \n"
     test_info_file += f"   Prompt tokens: {value.usage.prompt_tokens} \n"
     test_info_file += f"   Total tokens: {value.usage.total_tokens} \n"
