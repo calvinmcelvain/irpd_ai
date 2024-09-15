@@ -55,6 +55,7 @@ def stage_1_output(treatment: str, summary_type: str, test_type='test'):
     version = f.get_summary_version()
     df_typ1 = pd.read_csv(f'test_data/RAsum_{treatment}_{type_1}_v{version}.csv')
     df_typ2 = pd.read_csv(f'test_data/RAsum_{treatment}_{type_2}_v{version}.csv')
+    data_file = f'RAsum_{treatment}_{type_1}_v{version}.csv & RAsum_{treatment}_{type_2}_v{version}.csv'    # For test info
 
     df_typ1['window_number'] = df_typ1['window_number'].astype(int)   # Making sure window number is an integer
     df_typ2['window_number'] = df_typ2['window_number'].astype(int)
@@ -95,7 +96,7 @@ def stage_1_output(treatment: str, summary_type: str, test_type='test'):
         f.write_file(file_path=user_prmpt_path, file_write=user_prmpt)
         f.write_file(file_path=response_path, file_write=str(response))
     
-    f.write_test_info(test_info=info_data, directory=test_dir, test_number=test_number, model_info=model, stage_number = '1')    # Writing test information
+    f.write_test_info(test_info=info_data, directory=test_dir, test_number=test_number, model_info=model, stage_number = '1', data_file=data_file)    # Writing test information
     return print("Stage 1 Complete")
 
 
@@ -188,6 +189,7 @@ def stage_2_output(treatment, summary_type, max_windows=None, test_type='test', 
     version = f.get_summary_version()
     df_typ1 = pd.read_csv(f'test_data/RAsum_{treatment}_{type_1}_v{version}.csv')
     df_typ2 = pd.read_csv(f'test_data/RAsum_{treatment}_{type_2}_v{version}.csv')
+    data_file = f'RAsum_{treatment}_{type_1}_v{version}.csv & RAsum_{treatment}_{type_2}_v{version}.csv'    # For test info
 
     df_typ1['window_number'] = df_typ1['window_number'].astype(int)   # Making sure window number is an integer
     df_typ2['window_number'] = df_typ2['window_number'].astype(int)
@@ -280,7 +282,7 @@ def stage_2_output(treatment, summary_type, max_windows=None, test_type='test', 
     final_out_path = os.path.join(test_dir, f"t{test[5:]}_final_output.csv" if test_type == 'test' else f"{test}_final_output.csv")
     final_df.to_csv(final_out_path, index=False)
     
-    f.write_test_info(test_info=info_data, directory=test_dir, test_number=test_number, model_info=model, stage_number = '2')    # Writing test information
+    f.write_test_info(test_info=info_data, directory=test_dir, test_number=test_number, model_info=model, stage_number='2', data_file=data_file)    # Writing test information
     return print("Stage 2 Complete")
 
 

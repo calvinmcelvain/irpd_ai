@@ -132,7 +132,7 @@ def get_test_directory(test_type: str, test: str):
   return test_dir
 
 
-def write_test_info(test_info: dict, directory: str, test_number: str, model_info: any, stage_number: str):
+def write_test_info(test_info: dict, directory: str, test_number: str, model_info: any, stage_number: str, data_file=''):
   test_info_file = "MODEL INFORMATION: \n\n"
   test_info_file += f" Model: {model_info.MODEL} \n"
   test_info_file += f" Termperature: {model_info.TEMPERATURE} \n"
@@ -147,6 +147,7 @@ def write_test_info(test_info: dict, directory: str, test_number: str, model_inf
   # Getting test time
   first_key = next(iter(test_info))
   test_info_file += f' Test date/time: {datetime.fromtimestamp(test_info[first_key].created).strftime('%Y-%m-%d %H:%M:%S')} \n'
+  test_info_file += f' Data file: {data_file} \n'
   test_info_file += f' System fingerprint: {test_info[first_key].system_fingerprint}\n'
 
   # Loop through each window
