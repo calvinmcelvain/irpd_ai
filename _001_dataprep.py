@@ -73,6 +73,7 @@ ra_merged_trim.to_csv(f'trim_data/RAsum_merged_v{version}.csv', index=False)
 ra_no_noise = pd.read_csv(f'trim_data/RAsum_no_noise_v{version}.csv')
 ra_noise = pd.read_csv(f'trim_data/RAsum_noise_v{version}.csv')
 ra_merge = pd.read_csv(f'trim_data/RAsum_merged_v{version}.csv')
+ra_merge = ra_merge.drop(['treatment'], axis=1)
 
 # Creating ucoop and udef test data
 ra_no_noise_coop, ra_no_noise_def = f.test_summaries(ra_no_noise, type=summary_type)   # ucoop & udef no-noise test data
