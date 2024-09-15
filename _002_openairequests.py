@@ -12,7 +12,6 @@ from gpt_key import key
 import functions as f
 import gpt_module
 import pandas as pd
-import numpy as np
 import importlib
 importlib.reload(f)
 importlib.reload(gpt_module)
@@ -246,9 +245,9 @@ def stage_2_output(treatment, summary_type, max_windows=None, test_type='test', 
             f.write_file(output_path, str(response))
 
         # Gettting average (mean) of usage tokens and overwriting current value
-        mcompletion_tok = np.mean(completion_tok)
-        mprompt_tok = np.mean(prompt_tok)
-        mtotal_tok = np.mean(total_tok)
+        mcompletion_tok = sum(completion_tok)
+        mprompt_tok = sum(prompt_tok)
+        mtotal_tok = sum(total_tok)
         info_data[i[0]].usage.completion_tokens = mcompletion_tok
         info_data[i[0]].usage.prompt_tokens = mprompt_tok
         info_data[i[0]].usage.total_tokens = mtotal_tok
