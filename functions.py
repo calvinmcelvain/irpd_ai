@@ -207,25 +207,15 @@ def response_df(response_dir: str, test_df: str):
   return df
 
 
-def ucoop_udef_rename(df, prefix: str):
+def category_prefix(df, summary_type: str, prefix: str):
   '''
-  Adds 'ucoop' and 'udef' prefixes to categories names in the output of the response_df
+  Adds prefixes to categories names in the output of the response_df
   '''
-  remove_columns = ['summary', 'unilateral_cooperation', 'window_number', 'gpt_reasoning']
-  df_dropped = df.drop(columns=remove_columns)
-  category_columns = df_dropped.columns.to_list()
-  
-  rename_dict = {col: f'{prefix}_{col}' for col in category_columns}
-  df = df.rename(columns=rename_dict)
-      
-  return df
-
-
-def coop_def_rename(df, prefix: str):
-  '''
-  Adds 'coop' and 'def' prefixes to categories names in the output of the response_df
-  '''
-  remove_columns = ['summary', 'cooperation', 'window_number', 'gpt_reasoning']
+  if summary_type == 'first' or summary_type == 'switch':
+    remove_columns = ['summary', 'cooperation', 'window_number', 'gpt_reasoning']
+  else:
+    remove_columns = ['summary', 'unilateral_cooperation', 'window_number', 'gpt_reasoning']
+    
   df_dropped = df.drop(columns=remove_columns)
   category_columns = df_dropped.columns.to_list()
   
