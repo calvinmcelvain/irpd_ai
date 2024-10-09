@@ -133,10 +133,14 @@ def get_test_directory(test_type: str, test: str):
 
 
 def write_test_info(test_info: dict, directory: str, test_number: str, model_info: any, stage_number: str, data_file=''):
+  '''
+  Function to write test info (for each Stage)
+  '''
   test_info_file = "MODEL INFORMATION: \n\n"
   test_info_file += f" Model: {model_info.MODEL} \n"
   test_info_file += f" Termperature: {model_info.TEMPERATURE} \n"
   test_info_file += f" Max-tokens: {model_info.MAX_TOKENS} \n"
+  test_info_file += f" Seed: {model_info.SEED} \n"
   test_info_file += f" Top-p: {model_info.TOP_P} \n"
   test_info_file += f" Frequency penalty: {model_info.FREQUENCY_PENALTY} \n"
   test_info_file += f" Presence penalty: {model_info.PRESENCE_PENALTY} \n\n\n"
