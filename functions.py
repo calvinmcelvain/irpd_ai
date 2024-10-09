@@ -3,7 +3,7 @@ Functions module
 '''
 
 import os
-os.chdir('/Users/fogellmcmuffin/Documents/ra/team_discussions/AI/')   # Working Dir.
+os.chdir('/Users/fogellmcmuffin/Dropbox/ai_irpd_coding/')   # Working Dir.
 
 # Modules & Packages
 import pandas as pd

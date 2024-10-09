@@ -4,10 +4,10 @@ Test functions
 
 import sys
 import os
-os.chdir('/Users/fogellmcmuffin/Documents/ra/team_discussions/AI/')     # Working Dir.
+os.chdir('/Users/fogellmcmuffin/Dropbox/ai_irpd_coding/')   # Working Dir.
 
 # Modules & Packages
-sys.path.append('/Users/fogellmcmuffin/Documents/ra/team_discussions/AI/code/')
+sys.path.append('/Users/fogellmcmuffin/git_repos/irpd_ai/')
 from gpt_key import key
 import functions as f
 import gpt_module
