@@ -58,20 +58,6 @@ def get_test_name(summary_type: str, test_type='test', previous=False):
   return test_name
 
 
-def get_cat_number(stage_dir: str, previous=False):
-  '''
-  Returns the next/latest category name (if previous is False, it returns next category name)
-  '''
-  cats = [i[4:] for i in os.listdir(stage_dir) if i.startswith('cat')]
-  cat_numbers = [int(k) for k in cats]
-  cat_numbers.append(0)
-  
-  new_cat_number = max(cat_numbers) + 1 if previous == False else max(cat_numbers)
-  
-  cat_number = f"cat_{new_cat_number}"
-  return cat_number
-
-
 def create_system_prompt(approach: str, treatment: str, stage: str, window_type: str, general_task_overview=True, experiment_context=True, summary_context=True, task=True, constraints=True, output_format=True, data_var=True):
   '''
   Function to create the system prompt based on the approach, stage, and treatment
