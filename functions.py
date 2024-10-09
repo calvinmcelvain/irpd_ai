@@ -33,15 +33,6 @@ def write_file(file_path: str, file_write: any):
     file.write(file_write)     
 
 
-def get_summary_version():
-  '''
-  Returns the current summary data version from raw_data directory (string integer)
-  '''
-  summary_data = [int(k[-5:-4]) for k in os.listdir('raw_data/') if k.startswith('RAsum')]
-  version = max(summary_data)
-  return str(version)
-
-
 def get_test_name(test_type='test', previous=False):
   '''
   Returns the test name depending on:
