@@ -33,14 +33,15 @@ def write_file(file_path: str, file_write: any):
     file.write(file_write)     
 
 
-def get_test_name(test_type='test', previous=False):
+def get_test_name(summary_type: str, test_type='test', previous=False):
   '''
   Returns the test name depending on:
+  - summary_type: The type of summary being used
   - test_type: The type of test, either a 'test' or 'subtest'
   - previous: If True, it returns the current/latest test name. If False, it returns the name for the next test (latest test number + 1)
   '''
   if test_type == 'test':
-    test_path = 'output/'
+    test_path = f'output/{summary_type}/'
     
     tests = os.listdir(test_path)
     test_numbers = [int(re.findall(r'\d+', name)[0]) for name in tests if name.startswith('test_') and re.findall(r'\d+', name)]
