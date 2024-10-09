@@ -68,12 +68,12 @@ def get_window_types(summary_type: str):
     return 'ucoop', 'udef'
 
 
-def get_test_directory(test_type: str, test: str):
+def get_test_directory(summary_type: str, test_type: str, test: str):
   '''
-  Create a test directory based on the test type.
+  Create a test directory based on the test and summary type.
   '''
   if test_type == 'test':
-    test_dir = os.path.join('output/', test)
+    test_dir = os.path.join(f'output/{summary_type}/', test)
   else:
     test_dir = os.path.join('output/_subtests/', test)
   os.makedirs(test_dir, exist_ok=True)
