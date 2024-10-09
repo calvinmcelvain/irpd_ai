@@ -129,15 +129,6 @@ def remove_summary_commas(df):
   return df
 
 
-def trim(df, cols):
-  '''
-  Takes raw experimental data, drops columns (defined by cols arg), and trims rows to only cooperate & defect windows
-  '''
-  df = df.drop(cols, axis=1)
-  df = df.loc[(df['window_ucoop'] == 1) | (df['window_udef'] == 1)]
-  return df
-
-
 def test_summaries(df, type: str):
   '''
   Function to seperate the trim data into ucoop/udef or coop/def test dfs based on summary type
