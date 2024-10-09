@@ -225,19 +225,14 @@ def category_prefix(df, summary_type: str, prefix: str):
   return df
 
 
-def final_merge_df(final_df, og_df):
+def final_merge_df(final_df, og_df, summary_type: str):
   '''
   Function to get the original test dataframe variables with gpt codings & rationale
   '''
-  final_df = final_df.drop(['summary', 'unilateral_cooperation'], axis=1)
-  merged_df = pd.merge(og_df, final_df, on='window_number')
-  return merged_df
-
-
-def final_merge_df_FAR(final_df, og_df):
-  '''
-  Function to get the original test dataframe variables with gpt codings & rationale for FAR coding
-  '''
-  final_df = final_df.drop(['summary', 'cooperation'], axis=1)
+  if summary_type == 'first' or summary_type == 'switch':
+    final_df = final_df.drop(['summary', 'cooperation'], axis=1)
+  else:
+    final_df = final_df.drop(['summary', 'unilateral_cooperation'], axis=1)
+  
   merged_df = pd.merge(og_df, final_df, on='window_number')
   return merged_df
