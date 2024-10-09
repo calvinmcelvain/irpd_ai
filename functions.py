@@ -156,7 +156,7 @@ def extract_dict_from_file(file_path: str):
   Takes Stage 2 GPT reponses and extracts the Python dictionary. Then creates a new dictionary that includes a binary variables for each assigned category and a variable for the GPT reasoning
   '''
   with open(file_path, 'r', encoding='utf-8') as file:    # Opening response file
-      lines = file.readlines()
+    lines = file.readlines()
   
   text = ''.join(lines)
   
@@ -168,7 +168,7 @@ def extract_dict_from_file(file_path: str):
   cat_dict = ast.literal_eval(dict_text) # Turning dictionary string into python dictionary
   
   for i in cat_dict['assigned_categories']:  # Making a binary key for each assigned category
-      cat_dict[i] = 1
+    cat_dict[i] = 1
   
   # Extracting GPT reasoning
   start_keyword = "Step-by-step Reasoning: "
@@ -182,7 +182,7 @@ def extract_dict_from_file(file_path: str):
   data_dict['gpt_reasoning'] = reasoning
   
   for key, value in cat_dict.items(): # Making sure gpt_reasoning is the first key
-      data_dict[key] = value
+    data_dict[key] = value
   
   return data_dict
 
