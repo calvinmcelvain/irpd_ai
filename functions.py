@@ -147,19 +147,6 @@ def test_summaries(df, summary_type: str):
   return df_coop, df_def
 
 
-def ucoop_udef_windows(df):
-  '''
-  Function to seperate unilateral cooperate and defect windows into 2 different dataframes.
-  '''
-  df_ucoop = df.loc[df['window_ucoop'] == 1]
-  df_ucoop = df_ucoop.drop(['window_ucoop', 'window_udef'], axis=1)
-  
-  df_udef = df.loc[df['window_udef'] == 1]
-  df_udef = df_udef.drop(['window_ucoop', 'window_udef'], axis=1)
-  
-  return df_ucoop, df_udef
-
-
 #################################
 ## Final Output Data Functions ##
 #################################
