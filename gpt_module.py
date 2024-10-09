@@ -11,7 +11,7 @@ class GPT:
     '''
     Class for GPT requests
     '''
-    def __init__(self, api_key=None, organization=None, project=None, model='gpt-4o-2024-05-13', temperature=0, max_tokens=1300, top_p=1, frequency_penalty=0, presence_penalty=0):
+    def __init__(self, api_key=None, organization=None, project=None, model='gpt-4o-2024-05-13', temperature=0, max_tokens=1300, top_p=1, seed=None, frequency_penalty=0, presence_penalty=0):
         # Initialize OpenAI client
         self.client = OpenAI(
             api_key=api_key,
@@ -22,6 +22,7 @@ class GPT:
         self.MODEL = model
         self.TEMPERATURE = temperature
         self.MAX_TOKENS = max_tokens
+        self.SEED = seed
         self.TOP_P = top_p
         self.FREQUENCY_PENALTY = frequency_penalty
         self.PRESENCE_PENALTY = presence_penalty
@@ -68,6 +69,13 @@ class GPT:
         Sets presence penalty for GPT model
         '''
         self.PRESENCE_PENALTY = presence_penalty
+        
+    
+    def set_seed(self, seed):
+        '''
+        Sets seed parameter
+        '''
+        self.SEED = seed
 
 
     def GPT_response(self, sys, user):
@@ -79,6 +87,7 @@ class GPT:
             temperature=self.TEMPERATURE,
             max_tokens=self.MAX_TOKENS,
             top_p=self.TOP_P,
+            seed=self.SEED,
             frequency_penalty=self.FREQUENCY_PENALTY,
             presence_penalty=self.PRESENCE_PENALTY,
             messages=[
