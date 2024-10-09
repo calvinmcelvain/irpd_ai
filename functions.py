@@ -62,7 +62,7 @@ def get_window_types(summary_type: str):
   '''
   Get window types based on summary_type.
   '''
-  if summary_type == 'FAR':
+  if summary_type == 'first' or summary_type == 'switch':
     return 'coop', 'def'
   else:
     return 'ucoop', 'udef'
