@@ -58,36 +58,6 @@ def get_test_name(summary_type: str, test_type='test', previous=False):
   return test_name
 
 
-def create_system_prompt(approach: str, treatment: str, stage: str, window_type: str, general_task_overview=True, experiment_context=True, summary_context=True, task=True, constraints=True, output_format=True, data_var=True):
-  '''
-  Function to create the system prompt based on the approach, stage, and treatment
-  '''
-  if stage == 'stage_2' or stage == 'stage_1_2':
-    data_var = False
-  elif stage == 'stage_1_1':
-    experiment_context = False
-  elif stage == 'stage_1r':
-    data_var = False
-    experiment_context = False
-  
-  title = '# Task Description and Context'
-  s1 = file_to_string(file_path=f'prompts/{approach}/{stage}/general_task_overview.md') if general_task_overview == True else ''
-  experiment_context
-  s2 = file_to_string(file_path=f'prompts/experiment_context_{treatment}.md') if experiment_context == True else ''
-  s3 = file_to_string(file_path=f'prompts/summary_context.md') if summary_context == True else ''
-  s4 = file_to_string(file_path=f'prompts/{approach}/{stage}/task.md') if task == True else ''
-  s5 = file_to_string(file_path=f'prompts/{approach}/{stage}/constraints.md') if constraints == True else ''
-  s6 = file_to_string(file_path=f'prompts/{approach}/{stage}/output_format.md') if output_format == True else ''
-  s7 = file_to_string(file_path=f'prompts/data_variable_{window_type}.md') if data_var == True else ''
-  sections = [s1, s2, s3, s4, s5, s6, s7]
-  
-  sys_prompt = title + '\n\n'
-  for section in sections:
-    sys_prompt += section + '\n' if section != '' else section
-  
-  return sys_prompt
-
-
 def get_window_types(summary_type: str):
   '''
   Get window types based on summary_type.
