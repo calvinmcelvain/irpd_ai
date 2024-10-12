@@ -1,6 +1,5 @@
 '''
 Preparing data and creating test data for:
-- Reaw experimental data
 - RA created summaries
 '''
 
@@ -98,48 +97,3 @@ else:
 
 ra_noise.to_csv(f'test_data/RAsum_merged_noise_v{version}.csv', index=False)
 ra_no_noise.to_csv(f'test_data/RAsum_merged_no_noise_v{version}.csv', index=False)
-
-###########################
-## Raw Experimental Data ##
-###########################
-
-## Trimming data ##
-
-# Import raw data
-no_noise = pd.read_csv('raw_data/no_noise.csv')
-noise = pd.read_csv('raw_data/noise.csv')
-
-# Dropping columns & trimming 'noise' & 'no_noise' dfs
-common_drops = ['original_subject', 'super_game_match', 'time_message', 'Unnamed: 0']   # Columns to drop
-noise = f.trim(noise, common_drops)
-no_noise = f.trim(no_noise, common_drops + ['critical']) # Also dropping 'critical' column
-
-# Creating merged df using 'noise' & 'no_noise' dfs
-no_noise['treatment'] = 0
-noise['treatment'] = 1
-merged = pd.concat([no_noise, noise], ignore_index=True, sort=False)
-
-# Export trim data
-no_noise.to_csv('trim_data/no_noise.csv', index=False)
-noise.to_csv('trim_data/noise.csv', index=False)
-merged.to_csv('trim_data/merged.csv', index=False)
-
-## Creating test dataframes ##
-
-# Importing trim data
-merged = pd.read_csv('trim_data/merged.csv')
-no_noise = pd.read_csv('trim_data/no_noise.csv')
-noise = pd.read_csv('trim_data/noise.csv')
-
-# Creating ucoop and udef test data
-no_noise_ucoop, no_noise_udef = f.ucoop_udef_windows(no_noise)   # ucoop & udef no-noise test data
-noise_ucoop, noise_udef = f.ucoop_udef_windows(noise)    # ucoop & udef noise test data
-merge_ucoop, merge_udef = f.ucoop_udef_windows(merged)    # ucoop & udef merged test data
-
-# Export
-no_noise_ucoop.to_csv(f'test_data/no_noise_ucoop.csv', index=False)
-no_noise_udef.to_csv(f'test_data/no_noise_udef.csv', index=False)
-noise_ucoop.to_csv(f'test_data/noise_ucoop.csv', index=False)
-noise_udef.to_csv(f'test_data/noise_udef.csv', index=False)
-merge_ucoop.to_csv(f'test_data/merged_ucoop.csv', index=False)
-merge_udef.to_csv(f'test_data/merged_udef.csv', index=False)
