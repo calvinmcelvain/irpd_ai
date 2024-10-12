@@ -19,21 +19,25 @@ importlib.reload(f)
 ## Summary data ##
 ###################
 
-# Set this before running
-summary_type = 'FAR'
-
 ## Merging raw summary data ##
 
 # Import raw data
-version = f.get_summary_version()
-ra_noise_raw = pd.read_csv(f'raw_data/RAsum_noise_v{version}.csv')
-ra_no_noise_raw = pd.read_csv(f'raw_data/RAsum_no_noise_v{version}.csv')
+def MergeRawData(summary_type: str, RA: str):
+    if RA != 'both':
+        ra_noise_raw = pd.read_csv(f'raw/{summary_type}_noise_{RA}.csv')
+        ra_no_noise_raw = pd.read_csv(f'raw/{summary_type}_no_noise_{RA}.csv')
+    else:
+        ra1_noise_raw = pd.read_csv(f'raw/{summary_type}_noise_eli.csv')
+        ra1_no_noise_raw = pd.read_csv(f'raw/{summary_type}_no_noise_eli.csv')
+        ra2_noise_raw = pd.read_csv(f'raw/{summary_type}_noise_thi.csv')
+        ra2_no_noise_raw = pd.read_csv(f'raw/{summary_type}_no_noise_thi.csv')
+        ra_noise_raw = pd.merge(ra1_noise_raw, ra2_noise_raw, 'outer')
 
-# Merging
-merged_raw = pd.concat([ra_no_noise_raw, ra_noise_raw], ignore_index=True, sort=False)
+    # Merging
+    merged_raw = pd.concat([ra_no_noise_raw, ra_noise_raw], ignore_index=True, sort=False)
 
-# Export merged raw data
-merged_raw.to_csv(f'raw_data/RAsum_merged_v{version}.csv', index=False)
+    # Export merged raw data
+    merged_raw.to_csv(f'raw_data/{summary_type}_merged_{RA}.csv', index=False)
 
 ## Trimming data ##
 
