@@ -94,6 +94,3 @@ def Test_summaries(summary_type: str, RA: str):
     test_dfs[3].to_csv(f'test/{summary_type}_noise_{RA}_{type_2}.csv', index=False)
     test_dfs[4].to_csv(f'test/{summary_type}_merged_{RA}_{type_1}.csv', index=False)
     test_dfs[5].to_csv(f'test/{summary_type}_merged_{RA}_{type_2}.csv', index=False)
-    ra_no_noise.to_csv(f'test/{summary_type}_no_noise_{RA}_all.csv', index=False)
-    ra_noise.to_csv(f'test/{summary_type}_noise_{RA}_all.csv', index=False)
-    ra_merge.to_csv(f'test/{summary_type}_merged_{RA}_all.csv', index=False)
