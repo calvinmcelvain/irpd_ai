@@ -125,26 +125,11 @@ def remove_summary_commas(df):
   '''
   Function to remove commas in the summaries for better GPT readability
   '''
-  df[f'summary'] = df[f'summary'].str.replace(',', '', regex=False)
+  summary_columns = ['summary_1', 'summary_2']
+  df_column = df.columns.intersection(summary_columns)
+  df[df_column] = df[df_column].str.replace(',', '', regex=False)
   return df
 
-
-def test_summaries(df, summary_type: str):
-  '''
-  Function to seperate the trim data into ucoop/udef or coop/def test dfs based on summary type
-  '''
-  if summary_type == 'first' or summary_type == 'switch':
-    df_coop = df.loc[(df['cooperate'] == 1)]
-    df_coop = df_coop.drop(['cooperate'], axis=1)
-    df_def = df.loc[(df['cooperate'] == 0)]
-    df_def = df_def.drop(['cooperate'], axis=1)
-  else:
-    df_coop = df.loc[(df['unilateral_cooperate'] == 1)]
-    df_coop = df_coop.drop(['unilateral_cooperate', 'unilateral_defect'], axis=1)
-    df_def = df.loc[(df['unilateral_defect'] == 1)]
-    df_def = df_def.drop(['unilateral_defect', 'unilateral_cooperate'], axis=1)
-  
-  return df_coop, df_def
 
 
 #################################
