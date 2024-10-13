@@ -21,7 +21,6 @@ importlib.reload(f)
 
 ## Merging raw summary data ##
 
-# Import raw data
 def MergeRawData(summary_type: str, RA: str):
     if RA != 'both':
         ra_noise_raw = pd.read_csv(f'raw/{summary_type}_noise_{RA}.csv')
@@ -40,16 +39,26 @@ def MergeRawData(summary_type: str, RA: str):
     # Export merged raw data
     merged_raw.to_csv(f'raw_data/{summary_type}_merged_{RA}.csv', index=False)
 
+
 ## Trimming data ##
 
-# Import raw data
-ra_noise_trim = pd.read_csv(f'raw_data/RAsum_noise_v{version}.csv')
-ra_no_noise_trim = pd.read_csv(f'raw_data/RAsum_no_noise_v{version}.csv')
+def TrimData(summary_type: str, RA: str):
+    '''
+    Function that trims treatment specific summary data
+    '''
+    ra_noise_trim = pd.read_csv(f'raw/{summary_type}_noise_{RA}.csv')
+    ra_no_noise_trim = pd.read_csv(f'raw/{summary_type}_no_noise_{RA}.csv')
+    
+    if summary_type == 'first' or summary_type == 'switch':
+        keep_columns = ['summary_1', 'summary_2', 'window_number', 'cooperate']
+    else:
+        keep_columns = ['summary_1', 'summary_2', 'window_number', 'unilateral_cooperate', 'unilateral_defect']
+    
+    ra_noise_trim = ra_noise_trim[ra_noise_trim.intersection(keep_columns)]
+    ra_no_noise_trim = ra_no_noise_trim[ra_no_noise_trim.intersection(keep_columns)]
+    
+    return ra_noise_trim, ra_no_noise_trim
 
-# Trimming columns
-keep_columns = ['summary', 'window_number', 'unilateral_cooperate', 'unilateral_defect'] if summary_type != 'FAR' else ['summary', 'window_number', 'cooperate']
-ra_noise_trim = ra_noise_trim[keep_columns]
-ra_no_noise_trim = ra_no_noise_trim[keep_columns]
 
 # Creating merge df for RA summaries
 ra_no_noise_trim['treatment'] = 1
