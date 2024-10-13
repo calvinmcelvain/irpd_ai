@@ -216,11 +216,12 @@ def category_prefix(df, summary_type: str, prefix: str):
   Adds prefixes to categories names in the output of the response_df
   '''
   if summary_type == 'first' or summary_type == 'switch':
-    remove_columns = ['summary', 'cooperation', 'window_number', 'gpt_reasoning']
+    remove_columns = ['summary_1', 'summary_2', 'cooperation', 'window_number', 'gpt_reasoning']
   else:
-    remove_columns = ['summary', 'unilateral_cooperation', 'window_number', 'gpt_reasoning']
-    
-  df_dropped = df.drop(columns=remove_columns)
+    remove_columns = ['summary_1', 'summary_2', 'unilateral_cooperation', 'window_number', 'gpt_reasoning']
+  
+  df_remove_cols = df.columns.intersection(remove_columns)
+  df_dropped = df.drop(columns=df_remove_cols)
   category_columns = df_dropped.columns.to_list()
   
   rename_dict = {col: f'{prefix}_{col}' for col in category_columns}
@@ -234,9 +235,9 @@ def final_merge_df(final_df, og_df, summary_type: str):
   Function to get the original test dataframe variables with gpt codings & rationale
   '''
   if summary_type == 'first' or summary_type == 'switch':
-    final_df = final_df.drop(['summary', 'cooperation'], axis=1)
+    final_df = final_df.drop(columns=final_df.columns.intersection(['summary_1', 'summary_2', 'cooperation']))
   else:
-    final_df = final_df.drop(['summary', 'unilateral_cooperation'], axis=1)
+    final_df = final_df.drop(columns=final_df.columns.intersection(['summary_1', 'summary_2', 'unilateral_cooperation']))
   
   merged_df = pd.merge(og_df, final_df, on='window_number')
   return merged_df
