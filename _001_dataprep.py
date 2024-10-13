@@ -32,6 +32,7 @@ def MergeRawData(summary_type: str, RA: str):
         ra2_noise_raw = pd.read_csv(f'raw/{summary_type}_noise_thi.csv')
         ra2_no_noise_raw = pd.read_csv(f'raw/{summary_type}_no_noise_thi.csv')
         ra_noise_raw = pd.merge(ra1_noise_raw, ra2_noise_raw, 'outer')
+        ra_no_noise_raw = pd.merge(ra1_no_noise_raw, ra2_no_noise_raw, 'outer')
 
     # Merging
     merged_raw = pd.concat([ra_no_noise_raw, ra_noise_raw], ignore_index=True, sort=False)
