@@ -60,9 +60,9 @@ def TrimData(summary_type: str, RA: str):
     else:
         keep_columns = ['summary_1', 'summary_2', 'window_number', 'unilateral_cooperate', 'unilateral_defect', 'treatment']
     
-    ra_noise_trim = ra_noise_trim[ra_noise_trim.intersection(keep_columns)]
-    ra_no_noise_trim = ra_no_noise_trim[ra_no_noise_trim.intersection(keep_columns)]
-    ra_merged_trim = ra_merged_trim[ra_merged_trim.intersection(keep_columns)]
+    ra_noise_trim = ra_noise_trim[ra_noise_trim.columns.intersection(keep_columns)]
+    ra_no_noise_trim = ra_no_noise_trim[ra_no_noise_trim.columns.intersection(keep_columns)]
+    ra_merged_trim = ra_merged_trim[ra_merged_trim.columns.intersection(keep_columns)]
     
     ra_noise_trim = f.remove_summary_commas(ra_noise_trim)
     ra_no_noise_trim = f.remove_summary_commas(ra_no_noise_trim)
