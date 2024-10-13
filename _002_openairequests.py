@@ -108,13 +108,13 @@ def stage_1r_output(treatment, summary_type, test_type='test'):
     type_1, type_2 = f.get_window_types(summary_type=summary_type)
     
     # Getting test directory
-    test = f.get_test_name(test_type=test_type, previous=True)
+    test = f.get_test_name(summary_type=summary_type, test_type=test_type, previous=True)
     test_number = test[5:] if test_type == 'test' else test
-    test_dir = f.get_test_directory(test_type=test_type, test=test)
+    test_dir = f.get_test_directory(summary_type=summary_type, test_type=test_type, test=test)
     
     # System prompts
-    sys_typ1 = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1r', window_type=type_1)
-    sys_typ2 = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1r', window_type=type_2)
+    sys_typ1 = f.file_to_string(file_path=f'prompts/{summary_type}/stg_1r_{treatment}_{type_1}.md')
+    sys_typ2 = f.file_to_string(file_path=f'prompts/{summary_type}/stg_1r_{treatment}_{type_2}.md')
     
     # User prompts
     stg_1_typ1_dir = os.path.join(test_dir, f'stage_1_{type_1}/')
