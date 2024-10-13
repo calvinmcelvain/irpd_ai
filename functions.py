@@ -42,8 +42,12 @@ def get_test_name(summary_type: str, test_type='test', previous=False):
   if test_type == 'test':
     test_path = f'output/{summary_type}/'
     
-    tests = os.listdir(test_path)
+    tests = os.listdir(test_path) if os.path.exists(test_path) else []
     test_numbers = [int(re.findall(r'\d+', name)[0]) for name in tests if name.startswith('test_') and re.findall(r'\d+', name)]
+    
+    if not test_numbers:
+      return 'test_1'
+    
     new_test_number = max(test_numbers) + 1 if previous == False else max(test_numbers)
     
     test_name = f"test_{new_test_number}"
