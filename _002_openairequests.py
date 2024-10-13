@@ -259,16 +259,15 @@ def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None,
                 df['cooperation'] = 1
             else:
                 df['unilateral_cooperation'] = 1
+            typ1_df = f.response_df(response_dir=response_path, test_df=df)  # Coding GPT classifications for ucoop instances
+            typ1_df = f.category_prefix(df=typ1_df, summary_type=summary_type, prefix=type_1) # Adding ucoop prefix to categories
         else:
             if summary_type == 'first' or summary_type == 'switch':
                 df['cooperation'] = 0
             else:
                 df['unilateral_cooperation'] = 0
-        
-        typ1_df = f.response_df(response_dir=response_path, test_df=df)  # Coding GPT classifications for ucoop instances
-        typ2_df = f.response_df(response_dir=response_path, test_df=df)
-        typ1_df = f.category_prefix(df=typ1_df, summary_type=summary_type, prefix=type_1) # Adding ucoop prefix to categories
-        typ2_df = f.category_prefix(df=typ2_df, summary_type=summary_type, prefix=type_2)
+            typ2_df = f.response_df(response_dir=response_path, test_df=df)
+            typ2_df = f.category_prefix(df=typ2_df, summary_type=summary_type, prefix=type_2)
 
     # Final output dataframe
     GPT_df = pd.concat([typ1_df, typ2_df], ignore_index=True, sort=False)
