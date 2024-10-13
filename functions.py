@@ -126,7 +126,7 @@ def remove_summary_commas(df):
   '''
   summary_columns = ['summary_1', 'summary_2']
   df_column = df.columns.intersection(summary_columns)
-  df[df_column] = df[df_column].str.replace(',', '', regex=False)
+  df[df_column] = df[df_column].replace(',', '', regex=False)
   return df
 
 
