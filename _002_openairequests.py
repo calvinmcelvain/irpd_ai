@@ -34,13 +34,14 @@ model.set_temperature(0)
 model.set_frequency_penalty(0)
 model.set_presence_penalty(0)
 model.set_top_p(1)
+model.set_seed(1240034)
 
 
 ####################
 ## Test functions ##
 ####################
 
-def stage_1_output(treatment: str, summary_type: str, test_type='test'):
+def stage_1_output(treatment: str, summary_type: str, RA: str, test_type='test'):
     '''
     Stage 1 function
     '''
@@ -48,14 +49,13 @@ def stage_1_output(treatment: str, summary_type: str, test_type='test'):
     type_1, type_2 = f.get_window_types(summary_type=summary_type)
     
     # System prompts
-    sys_typ1 = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1', window_type=type_1)
-    sys_typ2 = f.create_system_prompt(approach='approach_1', treatment=treatment, stage='stage_1', window_type=type_2)
+    sys_typ1 = f.file_to_string(file_path=f'prompts/{summary_type}/stg_1_{treatment}_{type_1}.md')
+    sys_typ2 = f.file_to_string(file_path=f'prompts/{summary_type}/stg_1_{treatment}_{type_2}.md')
 
     # Summary data (User prompts)
-    version = f.get_summary_version()
-    df_typ1 = pd.read_csv(f'test_data/RAsum_{treatment}_{type_1}_v{version}.csv')
-    df_typ2 = pd.read_csv(f'test_data/RAsum_{treatment}_{type_2}_v{version}.csv')
-    data_file = f'RAsum_{treatment}_{type_1}_v{version}.csv & RAsum_{treatment}_{type_2}_v{version}.csv'    # For test info
+    df_typ1 = pd.read_csv(f'data/test/{summary_type}_{treatment}_{RA}_{type_1}.csv')
+    df_typ2 = pd.read_csv(f'data/test/{summary_type}_{treatment}_{RA}_{type_2}.csv')
+    data_file = f'{summary_type}_{treatment}_{RA}_{type_1}.csv & {summary_type}_{treatment}_{RA}_{type_2}.csv'    # For test info
 
     df_typ1['window_number'] = df_typ1['window_number'].astype(int)   # Making sure window number is an integer
     df_typ2['window_number'] = df_typ2['window_number'].astype(int)
@@ -67,9 +67,9 @@ def stage_1_output(treatment: str, summary_type: str, test_type='test'):
     window_prompts = [[type_1, sys_typ1, user_typ1], [type_2, sys_typ2, user_typ2]]
 
     # Making test directory
-    test = f.get_test_name(test_type=test_type)
+    test = f.get_test_name(summary_type=summary_type, test_type=test_type)
     test_number = test[5:] if test_type == 'test' else test
-    test_dir = f.get_test_directory(test_type=test_type, test=test)
+    test_dir = f.get_test_directory(summary_type=summary_type, test_type=test_type, test=test)
 
     # GPT requests
     info_data = {type_1: 0, type_2: 0}      # Initializing info data
