@@ -131,6 +131,24 @@ def remove_summary_commas(df):
   return df
 
 
+def create_instance_dfs(df_set, summary_type: str):
+  '''
+  Function that takes a df set (no-noise, noise, and merged trim dfs), and returns instances for each df type
+  '''
+  instance_set = []
+  if summary_type == 'first' or summary_type == 'switch':
+    for df in df_set:
+      df_type1 = df.loc[(df['cooperate'] == 1)].drop(['cooperate'], axis=1)
+      df_type2 = df.loc[(df['cooperate'] == 0)].drop(['cooperate'], axis=1)
+      instance_set.append([df_type1, df_type2])
+  else:
+    for df in df_set:
+      df_type1 = df.loc[(df['unilateral_cooperate'] == 1)].drop(['unilateral_cooperate', 'unilateral_defect'], axis=1)
+      df_type2 = df.loc[(df['unilateral_defect'] == 1)].drop(['unilateral_cooperate', 'unilateral_defect'], axis=1)
+      instance_set.append([df_type1, df_type2])
+  
+  return instance_set
+
 
 #################################
 ## Final Output Data Functions ##
