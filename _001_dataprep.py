@@ -75,32 +75,25 @@ def TrimData(summary_type: str, RA: str):
 
 ## Creating test dataframes ##
 
-# Importing trim data
-ra_no_noise = pd.read_csv(f'trim_data/RAsum_no_noise_v{version}.csv')
-ra_noise = pd.read_csv(f'trim_data/RAsum_noise_v{version}.csv')
-ra_merge = pd.read_csv(f'trim_data/RAsum_merged_v{version}.csv')
-ra_merge = ra_merge.drop(['treatment'], axis=1)
-
-# Creating ucoop and udef test data
-ra_no_noise_coop, ra_no_noise_def = f.test_summaries(ra_no_noise, type=summary_type)   # ucoop & udef no-noise test data
-ra_noise_coop, ra_noise_def = f.test_summaries(ra_noise, type=summary_type)    # ucoop & udef noise test data
-ra_merge_coop, ra_merge_def = f.test_summaries(ra_merge, type=summary_type)    # ucoop & udef merged test data
-
-# Export
-if summary_type != 'FAR':
-    ra_no_noise_coop.to_csv(f'test_data/RAsum_no_noise_ucoop_v{version}.csv', index=False)
-    ra_no_noise_def.to_csv(f'test_data/RAsum_no_noise_udef_v{version}.csv', index=False)
-    ra_noise_coop.to_csv(f'test_data/RAsum_noise_ucoop_v{version}.csv', index=False)
-    ra_noise_def.to_csv(f'test_data/RAsum_noise_udef_v{version}.csv', index=False)
-    ra_merge_coop.to_csv(f'test_data/RAsum_merged_ucoop_v{version}.csv', index=False)
-    ra_merge_def.to_csv(f'test_data/RAsum_merged_udef_v{version}.csv', index=False)
-else:
-    ra_no_noise_coop.to_csv(f'test_data/RAsum_no_noise_coop_v{version}.csv', index=False)
-    ra_no_noise_def.to_csv(f'test_data/RAsum_no_noise_def_v{version}.csv', index=False)
-    ra_noise_coop.to_csv(f'test_data/RAsum_noise_coop_v{version}.csv', index=False)
-    ra_noise_def.to_csv(f'test_data/RAsum_noise_def_v{version}.csv', index=False)
-    ra_merge_coop.to_csv(f'test_data/RAsum_merged_coop_v{version}.csv', index=False)
-    ra_merge_def.to_csv(f'test_data/RAsum_merged_def_v{version}.csv', index=False)
-
-ra_noise.to_csv(f'test_data/RAsum_merged_noise_v{version}.csv', index=False)
-ra_no_noise.to_csv(f'test_data/RAsum_merged_no_noise_v{version}.csv', index=False)
+def Test_summaries(summary_type: str, RA: str):
+    '''
+    Function to seperate the trim data into ucoop/udef or coop/def test dfs based on summary type
+    '''
+    ra_no_noise = pd.read_csv(f'trim/{summary_type}_no_noise_{RA}.csv')
+    ra_noise = pd.read_csv(f'trim/{summary_type}_noise_{RA}.csv')
+    ra_merge = pd.read_csv(f'trim/{summary_type}_merged_{RA}.csv')
+    ra_merge = ra_merge.drop(['treatment'], axis=1)
+    
+    trim_dfs = [ra_no_noise, ra_noise, ra_merge]
+    test_dfs = f.create_instance_dfs(trim_dfs, summary_type)
+    
+    type_1, type_2 = f.get_window_types(summary_type)
+    test_dfs[0].to_csv(f'test/{summary_type}_no_noise_{RA}_{type_1}.csv', index=False)
+    test_dfs[1].to_csv(f'test/{summary_type}_no_noise_{RA}_{type_2}.csv', index=False)
+    test_dfs[2].to_csv(f'test/{summary_type}_noise_{RA}_{type_1}.csv', index=False)
+    test_dfs[3].to_csv(f'test/{summary_type}_noise_{RA}_{type_2}.csv', index=False)
+    test_dfs[4].to_csv(f'test/{summary_type}_merged_{RA}_{type_1}.csv', index=False)
+    test_dfs[5].to_csv(f'test/{summary_type}_merged_{RA}_{type_2}.csv', index=False)
+    ra_no_noise.to_csv(f'test/{summary_type}_no_noise_{RA}_all.csv', index=False)
+    ra_noise.to_csv(f'test/{summary_type}_noise_{RA}_all.csv', index=False)
+    ra_merge.to_csv(f'test/{summary_type}_merged_{RA}_all.csv', index=False)
