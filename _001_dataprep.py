@@ -5,10 +5,10 @@ Preparing data and creating test data for:
 
 import sys
 import os
-os.chdir('/Users/fogellmcmuffin/Dropbox/ai_irpd_coding/data')   # Working Dir.
+os.chdir('/Users/fogellmcmuffin/Dropbox/ai_irpd_coding/data/')   # Working Dir.
 
 # Modules & Packages
-sys.path.append('/Users/fogellmcmuffin/git_repos/irpd_ai/data/')
+sys.path.append('/Users/fogellmcmuffin/git_repos/irpd_ai/')
 import pandas as pd
 import functions as f
 import importlib
