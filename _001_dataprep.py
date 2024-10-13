@@ -8,7 +8,7 @@ import os
 os.chdir('/Users/fogellmcmuffin/Dropbox/ai_irpd_coding/data')   # Working Dir.
 
 # Modules & Packages
-sys.path.append('/Users/fogellmcmuffin/git_repos/irpd_ai/')
+sys.path.append('/Users/fogellmcmuffin/git_repos/irpd_ai/data/')
 import pandas as pd
 import functions as f
 import importlib
