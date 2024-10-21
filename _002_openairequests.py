@@ -113,7 +113,7 @@ def stage_1_output(treatment: str, summary_type: str, RA: str, test_type='test')
     # Making formatted, easy to read, Stage 1 output file
     cat_types = [type_1, type_2]
     formatted_response_path = os.path.join(test_dir, f't{test_number}_stg1_categories.pdf')
-    formatted_response = f.stage_1_response_format(responses=responses, cat_types=cat_types, file_path=formatted_response_path)
+    f.stage_1_response_format(responses=responses, cat_types=cat_types, file_path=formatted_response_path)
     
     return print("Stage 1 Complete")
 
