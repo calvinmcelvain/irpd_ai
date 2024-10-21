@@ -7,6 +7,8 @@ import os
 # Modules & Packages
 import pandas as pd
 from datetime import datetime
+from markdown_pdf import MarkdownPdf, Section
+import json
 import ast
 import re 
 
@@ -153,6 +155,44 @@ def create_instance_dfs(df_set, summary_type: str):
       instance_set.append(df_type2)
   
   return instance_set
+
+
+#######################################
+## GPT Response Formatting Functions ##
+#######################################
+
+def stage_1_response_format(responses: dict, cat_types: list, file_path: str):
+  '''
+  Function to convert the raw response (structured) of Stage 1 to an easy-to-read PDF and save it to a given file path.
+  
+  Args:
+  - responses (dict): A dictionary containing the raw JSON responses.
+  - cat_types (list): A list of category types.
+  - file_path (str): The file path where the PDF should be saved.
+  '''
+  # Create a PDF object
+  pdf = MarkdownPdf(toc_level=1)
+  
+  # Adding title
+  text = "# Stage 1 Categories \n\n"
+  
+  # Making response to literal JSON object
+  for i in range(2):
+    response_json = json.loads(responses[i])
+    
+    # Adding type category sections
+    text += f"## {cat_types[i].capitalize()} Categories \n\n"
+    cats = response_json['categories']
+    for category in range(len(cats)):
+      text += f"### {cats[category]['category_name']} \n\n"
+      text += f"**Definition**: {cats[category]['definition']}\n\n"
+      text += f"**Examples**:\n\n"
+      examples = cats[category]['examples']
+      for example in range(len(examples)):
+        text += f"{example}. Window number: {examples[example]['window_number']}, Reasoning: {examples[example]['reasoning']}\n\n"
+
+  pdf.add_section(Section(text, toc=False))
+  pdf.save(file_path)
 
 
 #################################
