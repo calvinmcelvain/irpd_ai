@@ -55,12 +55,14 @@ def stage_1_output(treatment: str, summary_type: str, RA: str, test_type='test')
     # Summary data (User prompts)
     df_typ1 = pd.read_csv(f'data/test/{summary_type}_{treatment}_{RA}_{type_1}.csv')
     df_typ2 = pd.read_csv(f'data/test/{summary_type}_{treatment}_{RA}_{type_2}.csv')
-    data_file = f'{summary_type}_{treatment}_{RA}_{type_1}.csv & {summary_type}_{treatment}_{RA}_{type_2}.csv'    # For test info
+    data_file = f'{summary_type}_{treatment}_{RA}_{type_1}.csv & {summary_type}_{treatment}_{RA}_{type_2}.csv'
 
-    df_typ1['window_number'] = df_typ1['window_number'].astype(int)   # Making sure window number is an integer
+    # Making sure window number is an integer
+    df_typ1['window_number'] = df_typ1['window_number'].astype(int)
     df_typ2['window_number'] = df_typ2['window_number'].astype(int)
 
-    user_typ1 = str(df_typ1.to_dict('records')) # Turning data into a list of dictionaries, then to string
+    # Turning data into a list of dictionaries, then to string
+    user_typ1 = str(df_typ1.to_dict('records'))
     user_typ2 = str(df_typ2.to_dict('records'))
 
     # Aggregating prompts
@@ -71,10 +73,13 @@ def stage_1_output(treatment: str, summary_type: str, RA: str, test_type='test')
     test_number = test[5:] if test_type == 'test' else test
     test_dir = f.get_test_directory(summary_type=summary_type, test_type=test_type, test=test)
 
+    # Initializing info data
+    info_data = {type_1: 0, type_2: 0}
+    
     # GPT requests
-    info_data = {type_1: 0, type_2: 0}      # Initializing info data
-    for i in window_prompts:  # Requests for instances
-        inst_dir = os.path.join(test_dir, f'stage_1_{i[0]}') # Creating ind. instance directory
+    for i in window_prompts:
+        # Creating ind. instance directory
+        inst_dir = os.path.join(test_dir, f'stage_1_{i[0]}')
         os.makedirs(inst_dir, exist_ok=False)
 
         # Prompts
@@ -84,7 +89,7 @@ def stage_1_output(treatment: str, summary_type: str, RA: str, test_type='test')
         # GPT request output
         model.set_max_tokens(2000)
         response, response_data = model.GPT_response(sys=sys_prmpt, user=user_prmpt, output_structure=gpt_module.Stage_1_Structure)
-        info_data[i[0]] = response_data     # Appending response data
+        info_data[i[0]] = response_data
         
         # Creating paths for prompts & GPT response
         sys_prmpt_path = os.path.join(inst_dir, f't{test_number}_stg_1_{i[0]}_sys_prmpt.txt')
@@ -96,7 +101,9 @@ def stage_1_output(treatment: str, summary_type: str, RA: str, test_type='test')
         f.write_file(file_path=user_prmpt_path, file_write=user_prmpt)
         f.write_file(file_path=response_path, file_write=str(response))
     
-    f.write_test_info(test_info=info_data, directory=test_dir, test_number=test_number, model_info=model, stage_number = '1', data_file=data_file)    # Writing test information
+    # Writing test information
+    f.write_test_info(test_info=info_data, directory=test_dir, test_number=test_number, model_info=model, stage_number = '1', data_file=data_file)
+    
     return print("Stage 1 Complete")
 
 
