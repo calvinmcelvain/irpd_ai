@@ -83,7 +83,7 @@ def stage_1_output(treatment: str, summary_type: str, RA: str, test_type='test')
 
         # GPT request output
         model.set_max_tokens(2000)
-        response, response_data = model.GPT_response(sys=sys_prmpt, user=user_prmpt)
+        response, response_data = model.GPT_response(sys=sys_prmpt, user=user_prmpt, output_structure=gpt_module.Stage_1_Structure)
         info_data[i[0]] = response_data     # Appending response data
         
         # Creating paths for prompts & GPT response

@@ -5,6 +5,7 @@ import os
 
 # Modules & Packages
 from openai import OpenAI
+from pydantic import BaseModel
 
 
 class GPT:
@@ -78,11 +79,11 @@ class GPT:
         self.SEED = seed
 
 
-    def GPT_response(self, sys, user):
+    def GPT_response(self, sys, user, output_structure):
         '''
         GPT request function
         '''
-        response = self.client.chat.completions.create(
+        response = self.client.beta.chat.completions.parse(
             model=self.MODEL,
             temperature=self.TEMPERATURE,
             max_tokens=self.MAX_TOKENS,
@@ -93,8 +94,25 @@ class GPT:
             messages=[
                 {"role": "system", "content": str(sys)},
                 {"role": "user", "content": str(user)}
-            ]
+            ],
+            response_format=output_structure,
         )
         gpt_response = response.choices[0].message.content  # GPT response var
         response_data = response
         return gpt_response, response_data
+
+
+# Structured outputs
+class Examples(BaseModel):
+    window_number: int
+    reasoning: str
+
+
+class Category(BaseModel):
+    category_name: str
+    definition: str
+    examples: list[Examples]
+
+
+class Stage_1_Structure(BaseModel):
+    categories: list[Category]
