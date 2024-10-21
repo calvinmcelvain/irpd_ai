@@ -108,7 +108,7 @@ def stage_1_output(treatment: str, summary_type: str, RA: str, test_type='test')
         f.write_file(file_path=response_path, file_write=str(response))
     
     # Writing test information
-    f.write_test_info(test_info=info_data, directory=test_dir, test_number=test_number, model_info=model, stage_number = '1', data_file=data_file)
+    f.write_test_info(test_info=info_data, directory=raw_dir, test_number=test_number, model_info=model, stage_number = '1', data_file=data_file)
     
     # Making formatted, easy to read, Stage 1 output file
     cat_types = [type_1, type_2]
