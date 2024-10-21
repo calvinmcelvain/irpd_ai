@@ -29,7 +29,7 @@ model = gpt_module.GPT(
 )
 
 # Set general (non-changing) settings
-model.set_model('gpt-4o-2024-05-13')
+model.set_model('gpt-4o-2024-08-06')
 model.set_temperature(0)
 model.set_frequency_penalty(0)
 model.set_presence_penalty(0)

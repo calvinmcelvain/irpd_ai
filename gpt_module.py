@@ -11,7 +11,7 @@ class GPT:
     '''
     Class for GPT requests
     '''
-    def __init__(self, api_key=None, organization=None, project=None, model='gpt-4o-2024-05-13', temperature=0, max_tokens=1300, top_p=1, seed=None, frequency_penalty=0, presence_penalty=0):
+    def __init__(self, api_key=None, organization=None, project=None, model='gpt-4o-2024-08-06', temperature=0, max_tokens=1300, top_p=1, seed=None, frequency_penalty=0, presence_penalty=0):
         # Initialize OpenAI client
         self.client = OpenAI(
             api_key=api_key,
