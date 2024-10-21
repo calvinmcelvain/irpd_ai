@@ -78,8 +78,12 @@ def stage_1_output(treatment: str, summary_type: str, RA: str, test_type='test')
     
     # GPT requests
     for i in window_prompts:
+        # Making raw output directory
+        raw_dir = os.path.join(test_dir, 'raw')
+        os.makedirs(raw_dir, exist_ok=False)
+        
         # Creating ind. instance directory
-        inst_dir = os.path.join(test_dir, f'stage_1_{i[0]}')
+        inst_dir = os.path.join(raw_dir, f'stage_1_{i[0]}')
         os.makedirs(inst_dir, exist_ok=False)
 
         # Prompts
