@@ -116,3 +116,13 @@ class Category(BaseModel):
 
 class Stage_1_Structure(BaseModel):
     categories: list[Category]
+    
+
+class Refinement(BaseModel):
+    category_name: str
+    keep_decision: bool
+    reasoning: str
+
+
+class Stage_1r_Structure(BaseModel):
+    final_categories: list[Refinement]

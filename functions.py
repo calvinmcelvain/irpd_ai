@@ -161,9 +161,9 @@ def create_instance_dfs(df_set, summary_type: str):
 ## GPT Response Formatting Functions ##
 #######################################
 
-def stage_1_response_format(responses: dict, cat_types: list, file_path: str):
+def stage_1_response_format(responses: list, cat_types: list, file_path: str, stage_1r = False):
   '''
-  Function to convert the raw response (structured) of Stage 1 to an easy-to-read PDF and save it to a given file path.
+  Function to convert the raw response (structured) of Stage 1 to an easy-to-read PDF and save it to a given file path. Also serves as a function to return a string format for Stage 1r user prompt
   
   Args:
   - responses (dict): A dictionary containing the raw JSON responses.
@@ -174,10 +174,10 @@ def stage_1_response_format(responses: dict, cat_types: list, file_path: str):
   pdf = MarkdownPdf(toc_level=1)
   
   # Adding title
-  text = "# Stage 1 Categories \n\n"
+  text = "# Stage 1 Categories \n\n" if stage_1r != True else ''
   
   # Making response to literal JSON object
-  for i in range(2):
+  for i in range(len(cat_types)):
     response_json = json.loads(responses[i])
     
     # Adding type category sections
@@ -191,9 +191,61 @@ def stage_1_response_format(responses: dict, cat_types: list, file_path: str):
       for example in range(len(examples)):
         text += f"{example}. Window number: {examples[example]['window_number']}, Reasoning: {examples[example]['reasoning']}\n\n"
 
-  pdf.add_section(Section(text, toc=False))
-  pdf.save(file_path)
+  if stage_1r == False:
+    pdf.add_section(Section(text, toc=False))
+    pdf.save(file_path)
+  else:
+    return(text)
 
+
+def stage_1r_response_format(stage_1_responses: list, responses: list, cat_types: list, file_path: str, stage_2 = False):
+  '''
+  Function to convert the raw response (structured) of Stage 1r to an easy-to-read PDF and save it to a given file path. Also serves as a function to return a string format for Stage 1r user prompt. Also serves as a function to return a string format for Stage 2 system prompt
+  '''
+  # Create a PDF object
+  pdf = MarkdownPdf(toc_level=1)
+  
+  # Adding title
+  text = "# Stage 1 Refined Categories \n\n" if stage_2 == False else ''
+  
+  # Making response to literal JSON object
+  for i in range(len(cat_types)):
+    response_json_og = json.loads(stage_1_responses[i])
+    response_json = json.loads(responses[i])
+    
+    # Adding type category sections
+    text += f"## {cat_types[i].capitalize()} Final Categories \n\n"
+    ref_cats = response_json['final_categories']
+    temp_og_cats = response_json_og['categories']
+    temp_dict = {item['category_name']: item for item in temp_og_cats}
+    og_cats = [temp_dict[item['category_name']] for item in ref_cats]
+    final_cats = [temp_dict[item['category_name']] for item in ref_cats if item['keep_decision'] == True]
+    if stage_2 == False:
+      for category in range(len(ref_cats)):
+        text += f"### {ref_cats[category]['category_name']} \n\n"
+        text += f"**Definition**: {og_cats[category]['definition']}\n\n"
+        text += f"**Keep Decision**: {ref_cats[category]['keep_decision']}\n\n"
+        text += f"*Reasoning*: {ref_cats[category]['reasoning']} \n\n"
+        text += f"**Examples**:\n\n"
+        examples = og_cats[category]['examples']
+        for example in range(len(examples)):
+          text += f"{example}. Window number: {examples[example]['window_number']}, Reasoning: {examples[example]['reasoning']}\n\n"
+    else:
+      for category in range(len(final_cats)):
+        text += f"### {final_cats[category]['category_name']} \n\n"
+        text += f"**Definition**: {final_cats[category]['definition']}\n\n"
+        text += f"**Examples**:\n\n"
+        examples = final_cats[category]['examples']
+        for example in range(len(examples)):
+          text += f"{example}. Window number: {examples[example]['window_number']}, Reasoning: {examples[example]['reasoning']}\n\n"
+
+  if stage_2 == False:
+    pdf.add_section(Section(text, toc=False))
+    pdf.save(file_path)
+  else:
+    pdf.add_section(Section(text, toc=False))
+    pdf.save(file_path)
+    return text
 
 #################################
 ## Final Output Data Functions ##

@@ -45,7 +45,7 @@ def stage_1_output(treatment: str, summary_type: str, RA: str, test_type='test')
     '''
     Stage 1 function
     '''
-    # Getting prefixes base don summary type
+    # Getting prefixes based on summary type
     type_1, type_2 = f.get_window_types(summary_type=summary_type)
     
     # System prompts
@@ -122,7 +122,7 @@ def stage_1r_output(treatment: str, summary_type: str, test_type='test'):
     '''
     Stage 1 refinement function
     '''
-    # Getting prefixes base don summary type
+    # Getting prefixes based on summary type
     type_1, type_2 = f.get_window_types(summary_type=summary_type)
     
     # Getting test directory
@@ -130,25 +130,33 @@ def stage_1r_output(treatment: str, summary_type: str, test_type='test'):
     test_number = test[5:] if test_type == 'test' else test
     test_dir = f.get_test_directory(summary_type=summary_type, test_type=test_type, test=test)
     
+    # Getting raw output directory
+    raw_dir = os.path.join(test_dir, 'raw')
+    
     # System prompts
     sys_typ1 = f.file_to_string(file_path=f'prompts/{summary_type}/stg_1r_{treatment}_{type_1}.md')
     sys_typ2 = f.file_to_string(file_path=f'prompts/{summary_type}/stg_1r_{treatment}_{type_2}.md')
     
     # User prompts
-    stg_1_typ1_dir = os.path.join(test_dir, f'stage_1_{type_1}/')
-    stg_1_typ2_dir = os.path.join(test_dir, f'stage_1_{type_2}/')
+    stg_1_typ1_dir = os.path.join(raw_dir, f'stage_1_{type_1}/')
+    stg_1_typ2_dir = os.path.join(raw_dir, f'stage_1_{type_2}/')
     typ1_response_path = os.path.join(stg_1_typ1_dir, f't{test_number}_stg_1_{type_1}_response.txt')
     typ2_response_path = os.path.join(stg_1_typ2_dir, f't{test_number}_stg_1_{type_2}_response.txt')
-    user_typ1 = f.file_to_string(file_path=typ1_response_path)
-    user_typ2 = f.file_to_string(file_path=typ2_response_path)
+    raw_typ1 = f.file_to_string(file_path=typ1_response_path)
+    raw_typ2 = f.file_to_string(file_path=typ2_response_path)
+    user_typ1 = f.stage_1_response_format(responses=[raw_typ1], cat_types=[type_1], file_path='', stage_1r=True)
+    user_typ2 = f.stage_1_response_format(responses=[raw_typ2], cat_types=[type_2], file_path='', stage_1r=True)
     
     # Aggregating prompts
     window_prompts = [[type_1, sys_typ1, user_typ1], [type_2, sys_typ2, user_typ2]]
     
+    # Initializing info data & response
+    info_data = {type_1: 0, type_2: 0}
+    responses = []
+    
     # GPT requests
-    info_data = {type_1: 0, type_2: 0}      # Initializing info data
     for i in window_prompts:  # Requests for instances
-        inst_dir = os.path.join(test_dir, f'stage_1r_{i[0]}') # Creating ind. instance directory
+        inst_dir = os.path.join(raw_dir, f'stage_1r_{i[0]}') # Creating ind. instance directory
         os.makedirs(inst_dir, exist_ok=False)
 
         # Prompts
@@ -157,8 +165,9 @@ def stage_1r_output(treatment: str, summary_type: str, test_type='test'):
 
         # GPT request output
         model.set_max_tokens(2000)
-        response, response_data = model.GPT_response(sys=sys_prmpt, user=user_prmpt)
-        info_data[i[0]] = response_data     # Appending response data
+        response, response_data = model.GPT_response(sys=sys_prmpt, user=user_prmpt, output_structure=gpt_module.Stage_1r_Structure)
+        info_data[i[0]] = response_data
+        responses.append(response)
 
         # Creating paths for prompts & GPT response
         sys_prmpt_path = os.path.join(inst_dir, f't{test_number}_stg_1r_{i[0]}_sys_prmpt.txt')
@@ -170,7 +179,14 @@ def stage_1r_output(treatment: str, summary_type: str, test_type='test'):
         f.write_file(file_path=user_prmpt_path, file_write=user_prmpt)
         f.write_file(file_path=response_path, file_write=str(response))
     
-    f.write_test_info(test_info=info_data, directory=test_dir, test_number=test_number, model_info=model, stage_number = '1r')    # Writing test information
+    # Writing test information
+    f.write_test_info(test_info=info_data, directory=test_dir, test_number=test_number, model_info=model, stage_number = '1r')
+    
+    # Making formatted, easy to read, Stage 1 output file
+    cat_types = [type_1, type_2]
+    formatted_response_path = os.path.join(test_dir, f't{test_number}_stg1r_categories.pdf')
+    
+    f.stage_1r_response_format(stage_1_responses=[raw_typ1, raw_typ2], responses=responses, cat_types=cat_types, file_path=formatted_response_path)
     return print("Stage 1r Complete")
 
 
