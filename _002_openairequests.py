@@ -194,52 +194,75 @@ def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None,
     '''
     Stage 2 function
     '''
-    # Getting prefixes base don summary type
+    # Getting prefixes based on summary type
     type_1, type_2 = f.get_window_types(summary_type=summary_type)
     
     # Getting test directory
     test = f.get_test_name(summary_type=summary_type, test_type=test_type, previous=True)
     test_number = test[5:] if test_type == 'test' else test
     test_dir = f.get_test_directory(summary_type=summary_type, test_type=test_type, test=test)
+    
+    # Getting raw output directory
+    raw_dir = os.path.join(test_dir, 'raw')
 
     # System Prompts
-    stg_2_typ1_sys = f.file_to_string(file_path=f'prompts/{summary_type}/stg_2_{treatment}_{type_1}.md') # Getting system prompts for stage 2
+    stg_2_typ1_sys = f.file_to_string(file_path=f'prompts/{summary_type}/stg_2_{treatment}_{type_1}.md')
     stg_2_typ2_sys = f.file_to_string(file_path=f'prompts/{summary_type}/stg_2_{treatment}_{type_2}.md')
+    
+    # Getting Stage 1 response
+    stg_1_typ1_dir = os.path.join(raw_dir, f'stage_1_{type_1}/')
+    stg_1_typ2_dir = os.path.join(raw_dir, f'stage_1_{type_2}/')
+    typ1_stg_1_response_path = os.path.join(stg_1_typ1_dir, f't{test_number}_stg_1_{type_1}_response.txt')
+    typ2_stg_1_response_path = os.path.join(stg_1_typ2_dir, f't{test_number}_stg_1_{type_2}_response.txt')
+    raw_stg_1_typ1 = f.file_to_string(file_path=typ1_stg_1_response_path)
+    raw_stg_1_typ2 = f.file_to_string(file_path=typ2_stg_1_response_path)
+    
+    if refinement == True:
+        # Getting Stage 1r responses
+        stg_1r_typ1_dir = os.path.join(raw_dir, f'stage_1r_{type_1}/')
+        stg_1r_typ2_dir = os.path.join(raw_dir, f'stage_1r_{type_2}/')
+        typ1_stg_1r_response_path = os.path.join(stg_1r_typ1_dir, f't{test_number}_stg_1r_{type_1}_response.txt')
+        typ2_stg_1r_response_path = os.path.join(stg_1r_typ2_dir, f't{test_number}_stg_1r_{type_2}_response.txt')
+        raw_stg_1r_typ1 = f.file_to_string(file_path=typ1_stg_1r_response_path)
+        raw_stg_1r_typ2 = f.file_to_string(file_path=typ2_stg_1r_response_path)
+        
+        typ1_response = f.stage_1r_response_format(stage_1_responses=[raw_stg_1_typ1], responses=[raw_stg_1r_typ1], file_path='', stage_2=True, cat_types=[type_1])
+        typ2_response = f.stage_1r_response_format(stage_1_responses=[raw_stg_1_typ2], responses=[raw_stg_1r_typ2], file_path='', stage_2=True, cat_types=[type_2])
+    else:
+        typ1_response = f.stage_1_response_format(responses=[raw_stg_1_typ1], cat_types=[type_1], file_path='', stage_1r=True)
+        typ2_response = f.stage_1_response_format(responses=[raw_stg_1_typ2], cat_types=[type_2], file_path='', stage_1r=True)
 
-    ## Getting Stage 1 response to merge with Stage 2 system prompt
-    stage = '1' if refinement == False else '1r'    # Grabbing the response from either Stage 1 or Stage 1 refined
-    stg_1_typ1_dir = os.path.join(test_dir, f'stage_{stage}_{type_1}/')
-    stg_1_typ2_dir = os.path.join(test_dir, f'stage_{stage}_{type_2}/')
-    typ1_response_path = os.path.join(stg_1_typ1_dir, f't{test_number}_stg_{stage}_{type_1}_response.txt')
-    typ2_response_path = os.path.join(stg_1_typ2_dir, f't{test_number}_stg_{stage}_{type_2}_response.txt')
-
-    typ1_response = f.file_to_string(file_path=typ1_response_path)
-    typ2_response = f.file_to_string(file_path=typ2_response_path)
-
-    sys_typ1 = stg_2_typ1_sys + '\n' + typ1_response   # Final system prompts
+    # Final system prompts
+    sys_typ1 = stg_2_typ1_sys + '\n' + typ1_response
     sys_typ2 = stg_2_typ2_sys + '\n' + typ2_response
 
     # Summary data (User prompts)
     df_typ1 = pd.read_csv(f'data/test/{summary_type}_{treatment}_{RA}_{type_1}.csv')
     df_typ2 = pd.read_csv(f'data/test/{summary_type}_{treatment}_{RA}_{type_2}.csv')
-    data_file = f'{summary_type}_{treatment}_{RA}_{type_1}.csv & {summary_type}_{treatment}_{RA}_{type_2}.csv'    # For test info
+    
+    # For test info
+    data_file = f'{summary_type}_{treatment}_{RA}_{type_1}.csv & {summary_type}_{treatment}_{RA}_{type_2}.csv'
 
-    df_typ1['window_number'] = df_typ1['window_number'].astype(int)   # Making sure window number is an integer
+    # Making sure window number is an integer
+    df_typ1['window_number'] = df_typ1['window_number'].astype(int)
     df_typ2['window_number'] = df_typ2['window_number'].astype(int)
 
-    df_typ1 = df_typ1[:max_windows] if max_windows != None else df_typ1  # Adjusting to max windows for Stage 2
+    # Adjusting to max windows for Stage 2
+    df_typ1 = df_typ1[:max_windows] if max_windows != None else df_typ1
     df_typ2 = df_typ2[:max_windows] if max_windows != None else df_typ2
 
     # Aggregating prompts
     window_prompts = [[type_1, sys_typ1, df_typ1], [type_2, sys_typ2, df_typ2]]
     
-    info_data = {type_1: 0, type_2: 0}      # Initializing info data
+    # Initializing info data
+    info_data = {type_1: 0, type_2: 0}
     for i in window_prompts:
-        # Requests for instances
-        inst_dir = os.path.join(test_dir, f'stage_2_{i[0]}') # Creating ind. instance directory
+        # Creating ind. instance directory
+        inst_dir = os.path.join(raw_dir, f'stage_2_{i[0]}')
         os.makedirs(inst_dir, exist_ok=False)
 
-        sys_prmpt = i[1]    # System prompt for ucoop or udef data
+        # System prompt for ucoop or udef data
+        sys_prmpt = i[1]
         sys_prmpt_path = os.path.join(inst_dir, f't{test_number}_stg_2_{i[0]}_sys_prmpt.txt') 
         f.write_file(file_path=sys_prmpt_path, file_write=sys_prmpt)
 
@@ -254,16 +277,21 @@ def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None,
         prompt_tok = []
         total_tok = []
 
+        # Test data for ucoop or udef data
+        df = i[2]
+        
         # Requesting chat completion for each row
-        df = i[2]   # Test data for ucoop or udef data
         for k in range(len(df)):
-            row = df.iloc[k].to_dict()  # Creating a dictionary for each indv. row
+            # Creating a dictionary for each indv. row
+            row = df.iloc[k].to_dict()
             
             # GPT request output
             model.set_max_tokens(600)
-            response, response_data = model.GPT_response(sys=sys_prmpt, user=str(row))
+            response, response_data = model.GPT_response(sys=sys_prmpt, user=str(row), output_structure=gpt_module.Stage_2_Structure)
+            
+            # Appending response data
             if k == 1:
-                info_data[i[0]] = response_data     # Appending response data
+                info_data[i[0]] = response_data
             
             # Appending all values of token usage
             completion_tok.append(response_data.usage.completion_tokens)
@@ -293,8 +321,10 @@ def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None,
                 df['cooperation'] = 1
             else:
                 df['unilateral_cooperation'] = 1
-            typ1_df = f.response_df(response_dir=response_path, test_df=df)  # Coding GPT classifications for ucoop instances
-            typ1_df = f.category_prefix(df=typ1_df, summary_type=summary_type, prefix=type_1) # Adding ucoop prefix to categories
+            
+            # Adding ucoop prefix to categories
+            typ1_df = f.response_df(response_dir=response_path, test_df=df)
+            typ1_df = f.category_prefix(df=typ1_df, summary_type=summary_type, prefix=type_1)
         else:
             if summary_type == 'first' or summary_type == 'switch':
                 df['cooperation'] = 0

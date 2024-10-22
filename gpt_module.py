@@ -126,3 +126,9 @@ class Refinement(BaseModel):
 
 class Stage_1r_Structure(BaseModel):
     final_categories: list[Refinement]
+
+
+class Stage_2_Structure(BaseModel):
+    window_number: str
+    assigned_categories: list[str]
+    reasoning: str

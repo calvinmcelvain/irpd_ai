@@ -243,8 +243,6 @@ def stage_1r_response_format(stage_1_responses: list, responses: list, cat_types
     pdf.add_section(Section(text, toc=False))
     pdf.save(file_path)
   else:
-    pdf.add_section(Section(text, toc=False))
-    pdf.save(file_path)
     return text
 
 #################################
@@ -253,38 +251,15 @@ def stage_1r_response_format(stage_1_responses: list, responses: list, cat_types
 
 def extract_dict_from_file(file_path: str):
   '''
-  Takes Stage 2 GPT reponses and extracts the Python dictionary. Then creates a new dictionary that includes a binary variables for each assigned category and a variable for the GPT reasoning
+  Takes Stage 2 GPT reponses and returning json object.
   '''
-  with open(file_path, 'r', encoding='utf-8') as file:    # Opening response file
-    lines = file.readlines()
+  response = file_to_string(file_path=file_path)
+  response_data = json.loads(response)
   
-  text = ''.join(lines)
+  for i in response_data['assigned_categories']:
+    response_data[f"{i['category_name']}"] = 1
   
-  # Extracting dictionary
-  start = text.find('{')
-  end = text.find('}') + 1
-  dict_text = text[start:end]
-  
-  cat_dict = ast.literal_eval(dict_text) # Turning dictionary string into python dictionary
-  
-  for i in cat_dict['assigned_categories']:  # Making a binary key for each assigned category
-    cat_dict[i] = 1
-  
-  # Extracting GPT reasoning
-  start_keyword = "Step-by-step Reasoning: "
-  end_keyword = "Python Dictionary:"
-
-  start_index = text.find(start_keyword) + len(start_keyword)
-  end_index = text.find(end_keyword)
-  reasoning = text[start_index:end_index].strip()
-  
-  data_dict = {}
-  data_dict['gpt_reasoning'] = reasoning
-  
-  for key, value in cat_dict.items(): # Making sure gpt_reasoning is the first key
-    data_dict[key] = value
-  
-  return data_dict
+  return response_data
 
 
 def response_df(response_dir: str, test_df: str):
@@ -294,9 +269,9 @@ def response_df(response_dir: str, test_df: str):
   resp_list = []
   
   for file in os.listdir(response_dir):
-      file_path = os.path.join(response_dir, file)
-      reponse_dict = extract_dict_from_file(file_path)
-      resp_list.append(reponse_dict)
+    file_path = os.path.join(response_dir, file)
+    reponse_dict = extract_dict_from_file(file_path)
+    resp_list.append(reponse_dict)
   
   df = pd.DataFrame.from_records(resp_list)
   df = df.drop(['assigned_categories'], axis=1)
