@@ -224,13 +224,13 @@ def stage_1r_response_format(stage_1_responses: list, responses: list, cat_types
       for category in range(len(ref_cats)):
         text += f"### {ref_cats[category]['category_name']} \n\n"
         text += f"**Definition**: {og_cats[category]['definition']}\n\n"
-        text += f"**Kept**: {ref_cats[category]['keep_decision']}\n\n"
-        text += f"*Reasoning*: {ref_cats[category]['reasoning']} \n\n"
-        text += f"**Examples**:\n\n"
         if ref_cats[category]['keep_decision'] == True:
+          text += f"**Examples**:\n\n"
           examples = og_cats[category]['examples']
           for example in range(len(examples)):
             text += f"{example}. Window number: {examples[example]['window_number']}, Reasoning: {examples[example]['reasoning']}\n\n"
+        text += f"**Kept**: {ref_cats[category]['keep_decision']}\n\n"
+        text += f"  - *Reasoning*: {ref_cats[category]['reasoning']} \n\n"
     else:
       for category in range(len(final_cats)):
         text += f"### {final_cats[category]['category_name']} \n\n"
