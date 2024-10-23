@@ -224,12 +224,13 @@ def stage_1r_response_format(stage_1_responses: list, responses: list, cat_types
       for category in range(len(ref_cats)):
         text += f"### {ref_cats[category]['category_name']} \n\n"
         text += f"**Definition**: {og_cats[category]['definition']}\n\n"
-        text += f"**Keep Decision**: {ref_cats[category]['keep_decision']}\n\n"
+        text += f"**Kept**: {ref_cats[category]['keep_decision']}\n\n"
         text += f"*Reasoning*: {ref_cats[category]['reasoning']} \n\n"
         text += f"**Examples**:\n\n"
-        examples = og_cats[category]['examples']
-        for example in range(len(examples)):
-          text += f"{example}. Window number: {examples[example]['window_number']}, Reasoning: {examples[example]['reasoning']}\n\n"
+        if ref_cats[category]['keep_decision'] == True:
+          examples = og_cats[category]['examples']
+          for example in range(len(examples)):
+            text += f"{example}. Window number: {examples[example]['window_number']}, Reasoning: {examples[example]['reasoning']}\n\n"
     else:
       for category in range(len(final_cats)):
         text += f"### {final_cats[category]['category_name']} \n\n"
@@ -257,7 +258,10 @@ def extract_dict_from_file(file_path: str):
   response_data = json.loads(response)
   
   for i in response_data['assigned_categories']:
-    response_data[f"{i['category_name']}"] = 1
+    response_data[i] = 1
+  
+  del response_data['assigned_categories']
+  response_data['window_number'] = int(response_data['window_number'])
   
   return response_data
 
@@ -274,7 +278,6 @@ def response_df(response_dir: str, test_df: str):
     resp_list.append(reponse_dict)
   
   df = pd.DataFrame.from_records(resp_list)
-  df = df.drop(['assigned_categories'], axis=1)
   df = df.fillna(0)
   
   df = pd.merge(test_df, df, on='window_number', how='outer')
@@ -289,7 +292,7 @@ def category_prefix(df, summary_type: str, prefix: str):
   if summary_type == 'first' or summary_type == 'switch':
     remove_columns = ['summary_1', 'summary_2', 'cooperation', 'window_number', 'gpt_reasoning']
   else:
-    remove_columns = ['summary_1', 'summary_2', 'unilateral_cooperation', 'window_number', 'gpt_reasoning']
+    remove_columns = ['summary_1', 'summary_2', 'unilateral_cooperation', 'window_number', 'reasoning']
   
   df_remove_cols = df.columns.intersection(remove_columns)
   df_dropped = df.drop(columns=df_remove_cols)

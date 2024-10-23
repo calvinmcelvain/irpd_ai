@@ -180,7 +180,7 @@ def stage_1r_output(treatment: str, summary_type: str, test_type='test'):
         f.write_file(file_path=response_path, file_write=str(response))
     
     # Writing test information
-    f.write_test_info(test_info=info_data, directory=test_dir, test_number=test_number, model_info=model, stage_number = '1r')
+    f.write_test_info(test_info=info_data, directory=raw_dir, test_number=test_number, model_info=model, stage_number = '1r')
     
     # Making formatted, easy to read, Stage 1 output file
     cat_types = [type_1, type_2]
@@ -341,7 +341,7 @@ def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None,
     final_out_path = os.path.join(test_dir, f"t{test[5:]}_final_output.csv" if test_type == 'test' else f"{test}_final_output.csv")
     final_df.to_csv(final_out_path, index=False)
     
-    f.write_test_info(test_info=info_data, directory=test_dir, test_number=test_number, model_info=model, stage_number='2', data_file=data_file)    # Writing test information
+    f.write_test_info(test_info=info_data, directory=raw_dir, test_number=test_number, model_info=model, stage_number='2', data_file=data_file)    # Writing test information
     return print("Stage 2 Complete")
 
 
