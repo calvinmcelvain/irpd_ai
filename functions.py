@@ -189,7 +189,7 @@ def stage_1_response_format(responses: list, cat_types: list, file_path: str, st
       text += f"**Examples**:\n\n"
       examples = cats[category]['examples']
       for example in range(len(examples)):
-        text += f"{example}. Window number: {examples[example]['window_number']}, Reasoning: {examples[example]['reasoning']}\n\n"
+        text += f"{example + 1}. Window number: {examples[example]['window_number']}, Reasoning: {examples[example]['reasoning']}\n\n"
 
   if stage_1r == False:
     pdf.add_section(Section(text, toc=False))
@@ -228,7 +228,7 @@ def stage_1r_response_format(stage_1_responses: list, responses: list, cat_types
           text += f"**Examples**:\n\n"
           examples = og_cats[category]['examples']
           for example in range(len(examples)):
-            text += f"{example}. Window number: {examples[example]['window_number']}, Reasoning: {examples[example]['reasoning']}\n\n"
+            text += f"{example + 1}. Window number: {examples[example]['window_number']}, Reasoning: {examples[example]['reasoning']}\n\n"
         text += f"**Kept**: {ref_cats[category]['keep_decision']}\n\n"
         text += f"  - *Reasoning*: {ref_cats[category]['reasoning']} \n\n"
     else:
@@ -238,7 +238,7 @@ def stage_1r_response_format(stage_1_responses: list, responses: list, cat_types
         text += f"**Examples**:\n\n"
         examples = final_cats[category]['examples']
         for example in range(len(examples)):
-          text += f"{example}. Window number: {examples[example]['window_number']}, Reasoning: {examples[example]['reasoning']}\n\n"
+          text += f"{example + 1}. Window number: {examples[example]['window_number']}, Reasoning: {examples[example]['reasoning']}\n\n"
 
   if stage_2 == False:
     pdf.add_section(Section(text, toc=False))
