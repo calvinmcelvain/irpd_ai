@@ -11,6 +11,7 @@ sys.path.append('/Users/fogellmcmuffin/git_repos/irpd_ai/')
 from gpt_key import key
 import functions as f
 import gpt_module
+import json
 import pandas as pd
 import importlib
 importlib.reload(f)
@@ -190,9 +191,9 @@ def stage_1r_output(treatment: str, summary_type: str, test_type='test'):
     return print("Stage 1r Complete")
 
 
-def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None, test_type='test', refinement=True):
+def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None, test_type='test', refinement=True, stage_3 = True):
     '''
-    Stage 2 function
+    Stage 2 function and Stage 3 function
     '''
     # Getting prefixes based on summary type
     type_1, type_2 = f.get_window_types(summary_type=summary_type)
@@ -208,6 +209,8 @@ def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None,
     # System Prompts
     stg_2_typ1_sys = f.file_to_string(file_path=f'prompts/{summary_type}/stg_2_{treatment}_{type_1}.md')
     stg_2_typ2_sys = f.file_to_string(file_path=f'prompts/{summary_type}/stg_2_{treatment}_{type_2}.md')
+    stg_3_typ1_sys = f.file_to_string(file_path=f'prompts/{summary_type}/stg_3_{treatment}_{type_1}.md')
+    stg_3_typ2_sys = f.file_to_string(file_path=f'prompts/{summary_type}/stg_3_{treatment}_{type_2}.md')
     
     # Getting Stage 1 response
     stg_1_typ1_dir = os.path.join(raw_dir, f'stage_1_{type_1}/')
@@ -235,6 +238,8 @@ def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None,
     # Final system prompts
     sys_typ1 = stg_2_typ1_sys + '\n' + typ1_response
     sys_typ2 = stg_2_typ2_sys + '\n' + typ2_response
+    sys_typ1_stg3 = stg_3_typ1_sys + '\n' + typ1_response
+    sys_typ2_stg3 = stg_3_typ2_sys + '\n' + typ2_response
 
     # Summary data (User prompts)
     df_typ1 = pd.read_csv(f'data/test/{summary_type}_{treatment}_{RA}_{type_1}.csv')
@@ -252,10 +257,11 @@ def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None,
     df_typ2 = df_typ2[:max_windows] if max_windows != None else df_typ2
 
     # Aggregating prompts
-    window_prompts = [[type_1, sys_typ1, df_typ1], [type_2, sys_typ2, df_typ2]]
+    window_prompts = [[type_1, sys_typ1, df_typ1, sys_typ1_stg3], [type_2, sys_typ2, df_typ2, sys_typ2_stg3]]
     
     # Initializing info data
     info_data = {type_1: 0, type_2: 0}
+    info_data_stg3 = {type_1: 0, type_2: 0}
     for i in window_prompts:
         # Creating ind. instance directory
         inst_dir = os.path.join(raw_dir, f'stage_2_{i[0]}')
@@ -279,6 +285,28 @@ def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None,
 
         # Test data for ucoop or udef data
         df = i[2]
+        
+        # Stage 3 info and system prompt write
+        if stage_3 == True:
+            # Making directory
+            inst_dir_stg3 = os.path.join(raw_dir, f'stage_3_{i[0]}')
+            os.makedirs(inst_dir_stg3, exist_ok=False)
+            
+            # Writing system prompt
+            sys_prmpt_stg3 = i[3]
+            sys_prmpt_path_stg3 = os.path.join(inst_dir_stg3, f't{test_number}_stg_3_{i[0]}_sys_prmpt.txt') 
+            f.write_file(file_path=sys_prmpt_path_stg3, file_write=sys_prmpt_stg3)
+            
+            # Prompt & Response paths
+            prompt_path_stg3 = os.path.join(inst_dir_stg3, 'prompts')
+            response_path_stg3 = os.path.join(inst_dir_stg3, 'responses')
+            os.makedirs(prompt_path_stg3, exist_ok=True)
+            os.makedirs(response_path_stg3, exist_ok=True)
+            
+            # Initializing tokens to later average
+            completion_tok_stg3 = []
+            prompt_tok_stg3 = []
+            total_tok_stg3 = []
         
         # Requesting chat completion for each row
         for k in range(len(df)):
@@ -306,6 +334,31 @@ def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None,
             # Writing .txt files for prompts & GPT response
             f.write_file(user_prmpt_path, str(row))
             f.write_file(output_path, str(response))
+            
+            # For stage 3 prompts
+            if stage_3 == True:
+                user_prompt = f.stage_3_user_prompts(stage_2_response=response, summary=row)
+                
+                # GPT request output
+                model.set_max_tokens(600)
+                response_stg3, response_data_stg3 = model.GPT_response(sys=sys_prmpt_stg3, user=user_prompt, output_structure=gpt_module.Stage_3_Structure)
+                
+                # Appending response data
+                if k == 1:
+                    info_data_stg3[i[0]] = response_data_stg3
+                
+                # Appending all values of token usage
+                completion_tok_stg3.append(response_data_stg3.usage.completion_tokens)
+                prompt_tok_stg3.append(response_data_stg3.usage.prompt_tokens)
+                total_tok_stg3.append(response_data_stg3.usage.total_tokens)
+                
+                # Creating paths for prompts & GPT responses using window_numbers
+                user_prmpt_path_stg3 = os.path.join(prompt_path_stg3, f't{test_number}_{window_number}_user_prmpt.txt')
+                output_path_stg3 = os.path.join(response_path_stg3, f't{test_number}_{window_number}_response.txt')
+                
+                # Writing .txt files for prompts & GPT response
+                f.write_file(user_prmpt_path_stg3, str(user_prompt))
+                f.write_file(output_path_stg3, str(response_stg3))
 
         # Gettting average (mean) of usage tokens and overwriting current value
         mcompletion_tok = sum(completion_tok)
@@ -314,6 +367,13 @@ def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None,
         info_data[i[0]].usage.completion_tokens = mcompletion_tok
         info_data[i[0]].usage.prompt_tokens = mprompt_tok
         info_data[i[0]].usage.total_tokens = mtotal_tok
+        if stage_3 == True:
+            mcompletion_tok_stg3 = sum(completion_tok_stg3)
+            mprompt_tok_stg3 = sum(prompt_tok_stg3)
+            mtotal_tok_stg3 = sum(total_tok_stg3)
+            info_data_stg3[i[0]].usage.completion_tokens = mcompletion_tok_stg3
+            info_data_stg3[i[0]].usage.prompt_tokens = mprompt_tok_stg3
+            info_data_stg3[i[0]].usage.total_tokens = mtotal_tok_stg3
         
         # Prelimaries to final output
         if i[0] == type_1:
@@ -323,39 +383,55 @@ def stage_2_output(treatment: str, summary_type: str, RA: str, max_windows=None,
                 df['unilateral_cooperation'] = 1
             
             # Adding ucoop prefix to categories
-            typ1_df = f.response_df(response_dir=response_path, test_df=df)
+            typ1_df = f.response_df(response_dir=response_path, test_df=df, stage_3=False)
             typ1_df = f.category_prefix(df=typ1_df, summary_type=summary_type, prefix=type_1)
+            if stage_3 == True:
+                typ1_df_stg3 = f.response_df(response_dir=response_path_stg3, test_df=df, stage_3=True)
+                typ1_df_stg3 = f.category_prefix(df=typ1_df_stg3, summary_type=summary_type, prefix=type_1)
         else:
             if summary_type == 'first' or summary_type == 'switch':
                 df['cooperation'] = 0
             else:
                 df['unilateral_cooperation'] = 0
-            typ2_df = f.response_df(response_dir=response_path, test_df=df)
+            
+            typ2_df = f.response_df(response_dir=response_path, test_df=df, stage_3=False)
             typ2_df = f.category_prefix(df=typ2_df, summary_type=summary_type, prefix=type_2)
+            if stage_3 == True:
+                typ2_df_stg3 = f.response_df(response_dir=response_path_stg3, test_df=df, stage_3=True)
+                typ2_df_stg3 = f.category_prefix(df=typ2_df_stg3, summary_type=summary_type, prefix=type_1)
 
     # Final output dataframe
     GPT_df = pd.concat([typ1_df, typ2_df], ignore_index=True, sort=False)
     GPT_df = GPT_df.fillna(0)
     og_df = pd.read_csv(f'data/raw/{summary_type}_{treatment}_{RA}.csv')
     final_df = f.final_merge_df(final_df=GPT_df, og_df=og_df, summary_type=summary_type)
-    final_out_path = os.path.join(test_dir, f"t{test[5:]}_final_output.csv" if test_type == 'test' else f"{test}_final_output.csv")
+    final_out_path = os.path.join(test_dir, f"t{test_number}_stg2_final_output.csv")
     final_df.to_csv(final_out_path, index=False)
+    if stage_3 == True:
+        # Final output dataframe
+        GPT_df_stg3 = pd.concat([typ1_df_stg3, typ2_df_stg3], ignore_index=True, sort=False)
+        GPT_df_stg3 = GPT_df_stg3.fillna(0)
+        final_df_stg3 = f.final_merge_df(final_df=GPT_df_stg3, og_df=og_df, summary_type=summary_type)
+        final_out_path_stg3 = os.path.join(test_dir, f"t{test_number}_stg3_final_output.csv")
+        final_df_stg3.to_csv(final_out_path_stg3, index=False)
     
     # Writing test information
     f.write_test_info(test_info=info_data, directory=raw_dir, test_number=test_number, model_info=model, stage_number='2', data_file=data_file)
+    if stage_3 == True:
+        f.write_test_info(test_info=info_data_stg3, directory=raw_dir, test_number=test_number, model_info=model, stage_number='3', data_file="")
     
-    return print("Stage 2 Complete")
+    return print("Stage 2 Complete") if stage_3 == False else print("Stage 2 and 3 Complete")
 
 
-def run_full_test(treatment: str, summary_type: str, RA: str, test_type: str, max_windows: any, refinement: bool):
+def run_full_test(treatment: str, summary_type: str, RA: str, test_type: str, max_windows: any, refinement: bool, stage_3: bool):
     stage_1_output(treatment=treatment, summary_type=summary_type, RA=RA, test_type=test_type)
     if refinement == True:
         stage_1r_output(treatment=treatment, summary_type=summary_type, test_type=test_type)
-    stage_2_output(treatment=treatment, summary_type=summary_type, RA=RA, test_type=test_type, max_windows=max_windows, refinement=refinement)
+    stage_2_output(treatment=treatment, summary_type=summary_type, RA=RA, test_type=test_type, max_windows=max_windows, refinement=refinement, stage_3=stage_3)
     return print('Full Test Complete')
     
 
 # stage_1_output(treatment=, summary_type=, RA=, test_type=)
 # stage_1r_output(treatment=, summary_type=, test_type=)
-# stage_2_output(treatment=, summary_type=, RA=, test_type=, max_windows=, refinement=)
-# run_full_test(treatment=, summary_type=, RA=, test_type=, max_windows=, refinement=)
+# stage_2_output(treatment=, summary_type=, RA=, test_type=, max_windows=, refinement=, stage_3=)
+# run_full_test(treatment=, summary_type=, RA=, test_type=, max_windows=, refinement=, stage_3=)

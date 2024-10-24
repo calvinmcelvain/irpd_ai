@@ -132,3 +132,13 @@ class Stage_2_Structure(BaseModel):
     window_number: str
     assigned_categories: list[str]
     reasoning: str
+
+
+class Ranking(BaseModel):
+    category_name: str
+    rank: int
+    
+    
+class Stage_3_Structure(BaseModel):
+    window_number: str
+    category_ranking: list[Ranking]

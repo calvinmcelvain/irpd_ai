@@ -250,23 +250,28 @@ def stage_1r_response_format(stage_1_responses: list, responses: list, cat_types
 ## Final Output Data Functions ##
 #################################
 
-def extract_dict_from_file(file_path: str):
+def extract_dict_from_file(file_path: str, stage_3: bool):
   '''
   Takes Stage 2 GPT reponses and returning json object.
   '''
   response = file_to_string(file_path=file_path)
   response_data = json.loads(response)
   
-  for i in response_data['assigned_categories']:
-    response_data[i] = 1
+  if stage_3 == True:
+    for i in response_data['category_ranking']:
+      response_data[i['category_name']] = i['rank']
+    del response_data['category_ranking']
+  else:
+    for i in response_data['assigned_categories']:
+      response_data[i] = 1
+    del response_data['assigned_categories']
   
-  del response_data['assigned_categories']
   response_data['window_number'] = int(response_data['window_number'])
   
   return response_data
 
 
-def response_df(response_dir: str, test_df: str):
+def response_df(response_dir: str, test_df: str, stage_3: bool):
   '''
   Takes each GPT response for Stage 2 and runs it through extract_dict_from_file funtion. Returns a dataframe of the category codings and GPT reasoning (to do this, also need the test data used for stage 2, i.e., test_df)
   '''
@@ -274,7 +279,7 @@ def response_df(response_dir: str, test_df: str):
   
   for file in os.listdir(response_dir):
     file_path = os.path.join(response_dir, file)
-    reponse_dict = extract_dict_from_file(file_path)
+    reponse_dict = extract_dict_from_file(file_path, stage_3=stage_3)
     resp_list.append(reponse_dict)
   
   df = pd.DataFrame.from_records(resp_list)
@@ -315,3 +320,14 @@ def final_merge_df(final_df, og_df, summary_type: str):
   
   merged_df = pd.merge(og_df, final_df, on='window_number')
   return merged_df
+
+
+def stage_3_user_prompts(stage_2_response: str, summary: dict):
+  '''
+  Function to create user prompt for stage 3
+  '''
+  response = json.loads(stage_2_response)
+  prompt = summary
+  prompt['assigned_categories'] = response['assigned_categories']
+  
+  return(prompt)
