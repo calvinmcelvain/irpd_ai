@@ -429,9 +429,17 @@ def run_full_test(treatment: str, summary_type: str, RA: str, test_type: str, ma
         stage_1r_output(treatment=treatment, summary_type=summary_type, test_type=test_type)
     stage_2_output(treatment=treatment, summary_type=summary_type, RA=RA, test_type=test_type, max_windows=max_windows, refinement=refinement, stage_3=stage_3)
     return print('Full Test Complete')
+
+
+def run_full_set(summary_type: str, RA: str, test_type: str, max_windows: any, refinement: bool, stage_3: bool):
+    run_full_test(treatment='noise', summary_type=summary_type, RA=RA, test_type=test_type, max_windows=max_windows, refinement=refinement, stage_3=stage_3)
+    run_full_test(treatment='no_noise', summary_type=summary_type, RA=RA, test_type=test_type, max_windows=max_windows, refinement=refinement, stage_3=stage_3)
+    run_full_test(treatment='merged', summary_type=summary_type, RA=RA, test_type=test_type, max_windows=max_windows, refinement=refinement, stage_3=stage_3)
+    return print("Full Test Set Complete")
     
 
 # stage_1_output(treatment=, summary_type=, RA=, test_type=)
 # stage_1r_output(treatment=, summary_type=, test_type=)
 # stage_2_output(treatment=, summary_type=, RA=, test_type=, max_windows=, refinement=, stage_3=)
 # run_full_test(treatment=, summary_type=, RA=, test_type=, max_windows=, refinement=, stage_3=)
+# run_full_set(summary_type=, RA=, test_type=, max_windows=, refinement=, stage_3=)
