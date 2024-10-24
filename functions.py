@@ -295,7 +295,7 @@ def category_prefix(df, summary_type: str, prefix: str):
   Adds prefixes to categories names in the output of the response_df
   '''
   if summary_type == 'first' or summary_type == 'switch':
-    remove_columns = ['summary_1', 'summary_2', 'cooperation', 'window_number', 'gpt_reasoning']
+    remove_columns = ['summary_1', 'summary_2', 'cooperation', 'window_number', 'reasoning']
   else:
     remove_columns = ['summary_1', 'summary_2', 'unilateral_cooperation', 'window_number', 'reasoning']
   

@@ -142,3 +142,4 @@ class Ranking(BaseModel):
 class Stage_3_Structure(BaseModel):
     window_number: str
     category_ranking: list[Ranking]
+    reasoning: str
